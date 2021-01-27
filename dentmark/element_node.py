@@ -35,24 +35,35 @@ class ElementNode:
         print(self.tag_def)
         return f'[{self.tag_def.tag_name}, {rep[:-2]}]'
 
-    def render(self, template_manager):
+    def pre_render(self):
         content = []
-        for x in self.children:
-            child_content = x.render(template_manager)
-            if child_content:
-                content.append(child_content)
+        for child in self.children:
+            tag_def_inst = child.pre_render()
+            context = {}
+        return self.tag_def(content, {}, self.trim_left, self.trim_right)
+
+    def render(self):
+        content = ''
+        for child in self.children:
+            child_content = child.render()
+            #if child_content:
+                #content.append(child_content)
+            content += child_content
+        return 
+
+        #tag_def_inst = self.tag_def()
 
         #has_template = template_manager.has_template(self)
-        context = {'content': content, 'ctx': self.ctx}
-        rendered = template_manager.render(self, context)
-        if rendered is None:
+        #context = {'content': content, 'ctx': self.ctx}
+        #rendered = template_manager.render(self, context)
+        #if rendered is None:
             #raise Exception(f'Template Does Not Exist For Element')
-            print(f'Template Does Not Exist For Element (Assuming ctx for parent): {self.name}')
-            self.parent.ctx[self.name] = content
+            #print(f'Template Does Not Exist For Element (Assuming ctx for parent): {self.name}')
+            #self.parent.ctx[self.name] = content
             #return None
         #else:
             #context = {'content': content, 'ctx': self.ctx}
             #return self.template.render(context).strip()
             #pass
-        return rendered
+        #return rendered
 

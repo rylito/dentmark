@@ -11,6 +11,9 @@ class TextNode:
     def walk(self):
         return self.text
 
+    def pre_render(self):
+        return self
+
     def render(self, template_manager):
         return self.text
 

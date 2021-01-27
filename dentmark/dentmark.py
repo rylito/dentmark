@@ -35,3 +35,5 @@ class Dentmark:
     def render(self, file_name_or_str):
         p = Parser(self.defs_manager, file_name_or_str)
         tree = p.parse()
+        render_tree = tree.pre_render()
+        print(render_tree)

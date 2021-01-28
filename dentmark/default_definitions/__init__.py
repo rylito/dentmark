@@ -5,7 +5,7 @@ from dentmark import TagDef
 class RootTagDef(TagDef):
     tag_name = 'root'
     is_root = True
-    allow_children = ['p', 'a']
+    allow_children = ['p', 'a', 'code']
 
     def render_main(self):
         #return 'This is the primary string of root'
@@ -22,7 +22,7 @@ class RootTagDef(TagDef):
         return f'{body}<footnotes>{fns_rendered}</footnotes>'
 
 class PreTagDef(TagDef):
-    tag_name = 'pre'
+    tag_name = 'code'
     is_pre = True
     #is_root = True # for testing, remove this
 

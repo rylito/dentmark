@@ -90,7 +90,8 @@ class TagDef:
         #return f'[{self.trim_left}, {self.name}, {self.trim_right}, {rep[:-2]}]'
         return f'[{self.tag_name}, {rep[:-2]}]'
 
-
+    # can be overriden to customize or perform additional formatting on context tags
+    # (i.e. looking up urls based on blog entry PKs)
     def process_data(self, data):
         return data
 

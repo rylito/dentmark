@@ -12,7 +12,7 @@ ELEMENT_DELIM = ':'
 VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_'
 
 # special tags (get this from settings in the future?)
-PRE = 'pre'
+#PRE = 'pre'
 
 class Parser:
     def __init__(self, defs_manager, flo_or_str):
@@ -169,7 +169,8 @@ class Parser:
             #print('GOOD NAME', self.name_accum, self.trim_left, self.trim_right)
             self.track_name = False
             self.is_element = True
-            if self.name_accum == PRE:
+            #if self.name_accum == PRE:
+            if self.name_accum in self.defs_manager.pre_tag_names:
                 #print('you are in pre mode now bitch')
                 self.pre_mode = True
         elif c == TRIM:
@@ -275,7 +276,7 @@ class Parser:
                     self.line_accum = ''
                     #print('start tracking bitch')
                 elif c not in (SPACE, TAB):
-                    raise Exception(f'Inline content not allowed after {PRE} tag: line {line_no}')
+                    raise Exception(f'Inline content not allowed after tag with is_pre=True: line {line_no}')
 
                 if self.pre_mode:
                     continue

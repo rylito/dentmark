@@ -25,9 +25,10 @@ class TextNode:
 
     def render(self, main):
         #return f'{self.text}\n'
+        #TODO process quotes, em dash, etc
         return self.text
 
-    @property
-    def is_root(self):
-        return False
+    #@property
+    #def is_root(self):
+        #return False
 

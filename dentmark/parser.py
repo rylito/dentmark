@@ -1,5 +1,5 @@
 import io
-from dentmark.element_node import ElementNode
+#from dentmark.element_node import ElementNode
 from dentmark.text_node import TextNode
 
 # special character constants
@@ -115,10 +115,15 @@ class Parser:
                 #print(e)
                 #raise Exception('I ')
 
-            if not parent_node.tag_def.is_child_allowed(self.name_accum):
-                raise Exception(f"Child tag '{tag_def.tag_name}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_def.tag_name}'")
+            if not parent_node.is_child_allowed(self.name_accum):
+                raise Exception(f"Child tag '{tag_def.tag_name}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
 
-            node = ElementNode(prev_line_no, prev_indent_level, parent_node, child_order, tag_def, self.trim_left, self.trim_right)
+            #node = ElementNode(prev_line_no, prev_indent_level, parent_node, child_order, tag_def, self.trim_left, self.trim_right)
+
+            prev_count = self.counts.get(self.name_accum, 0)
+            self.counts[self.name_accum] = prev_count + 1
+
+            node = tag_def(prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
 
             text = None
             if self.pre_text_pending:
@@ -225,7 +230,11 @@ class Parser:
 
     def parse(self):
         #root_template = self.template_manager.get_root_template()
-        self.stack = [ElementNode.root(self.defs_manager.root_def)]
+        #self.stack = [ElementNode.root(self.defs_manager.root_def)]
+
+        self.counts = {}
+
+        self.stack = [self.defs_manager.root_def.init_as_root()]
         self.prev_processed = None
         self.lowest_indent = None
 

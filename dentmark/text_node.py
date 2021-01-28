@@ -28,7 +28,12 @@ class TextNode:
         #TODO process quotes, em dash, etc
         return self.text
 
-    #@property
-    #def is_root(self):
-        #return False
+    def to_dentmark(self, indent_level):
+        tab = ' ' * (indent_level * 4)
+        text = tab + self.text
 
+        if self.parent.is_pre:
+            split = self.text.split('\n')
+            text = '\n'.join([tab + _ for _ in split])
+
+        return text + '\n'

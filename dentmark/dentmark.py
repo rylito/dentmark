@@ -32,12 +32,28 @@ class Dentmark:
         print(self.defs_manager.tag_dict)
         print(self.defs_manager.pre_tag_names)
 
-    def render(self, file_name_or_str):
+    def parse(self, file_name_or_str):
         p = Parser(self.defs_manager, file_name_or_str)
-        root = p.parse()
+        return p.parse()
+
+    def render(self, file_name_or_str):
+        #p = Parser(self.defs_manager, file_name_or_str)
+        root = self.parse(file_name_or_str)
         root.pre_render(root)
         rendered = root.render()
         print('RENDERED')
         print(rendered)
         #render_tree = tree.pre_render()
         #print(render_tree)
+        return rendered
+
+    #def modify_test(self, file_name_or_str): #TODO testing DELME
+        #root = self.parse(file_name_or_str)
+
+    def add_element(self, file_name_or_str, tag_id, new_tag_name, value):
+        root = self.parse(file_name_or_str)
+        found_element = root.get_tag_by_id(tag_id)
+        if found_element is None:
+            raise Exception('Element for tag_id not found: {tag_id}')
+        found_element.add_child_element(self.defs_manager, new_tag_name, value)
+        return root

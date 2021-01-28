@@ -171,7 +171,6 @@ class Parser:
             self.is_element = True
             #if self.name_accum == PRE:
             if self.name_accum in self.defs_manager.pre_tag_names:
-                #print('you are in pre mode now bitch')
                 self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
@@ -264,7 +263,6 @@ class Parser:
                         self.pre_text_pending = True
 
                         if c == COMMENT:
-                            #print('motherfuck')
                             self.is_comment = True
                             continue
 
@@ -274,7 +272,6 @@ class Parser:
                 elif c == NEWLINE:
                     pre_mode_begin = True
                     self.line_accum = ''
-                    #print('start tracking bitch')
                 elif c not in (SPACE, TAB):
                     raise Exception(f'Inline content not allowed after tag with is_pre=True: line {line_no}')
 

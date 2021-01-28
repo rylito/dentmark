@@ -35,6 +35,8 @@ class TagDef:
         self.content = ''
         self.context = {}
 
+        self.tag_id = f'{self.tag_name}-{self.nth_of_type}'
+
 
     @classmethod
     def init_as_root(cls):
@@ -144,3 +146,49 @@ class TagDef:
     def render_secondary(self):
         # TODO is this a sane default?
         return self.render_main()
+
+    def add_child_element(self, defs_manager, tag_name, value):
+
+        tag_def = defs_manager.get_def(tag_name)
+        if tag_def is None:
+            raise Exception(f"Not a defined tag_name: {tag_name}")
+
+        if tag_name not in self.allow_children:
+            def_ref = f"TagDef '{self.__class__.__name__}'"
+            raise Exception(f"Child tag '{tag_name}' not allowed as child of {def_ref}")
+
+        # TODO just use None for values that can't be calculated. A bit hackish, but will
+        # be fine to just re-generate the dentmark code. Not going to render this tree
+        tag_def_inst = tag_def(None, None, self, len(self.children), None, False, False)
+
+        from dentmark.text_node import TextNode
+
+        text_node_inst = TextNode(None, None, tag_def_inst, 0, value)
+        tag_def_inst.children.append(text_node_inst)
+        self.children.append(tag_def_inst)
+
+
+    def get_tag_by_id(self, tag_id):
+        #if self.tag_name == tag_name and self.nth_of_type == nth_of_type:
+        if self.tag_id == tag_id:
+            return self
+
+        for child in self.children:
+            if not child.is_element:
+                continue
+            found_it = child.get_tag_by_id(tag_id)
+            if found_it:
+                return found_it
+        return None
+
+
+    # experiment with generating dentmark markup from the tree,
+    # so that eventually we can edit the tree, then output modified dentmark
+    def to_dentmark(self, indent_level = 0):
+        children_str = ''
+        for child in self.children:
+            children_str += child.to_dentmark(indent_level + 1)
+        tab = ' ' * (indent_level * 4)
+        trim_left = '-' if self.trim_left else ''
+        trim_right = '-' if self.trim_right else ''
+        return f'{tab}{trim_left}{self.tag_name}{trim_right}:\n{children_str}'

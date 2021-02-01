@@ -1,24 +1,28 @@
 from dentmark import TagDef
 
-class AnchorTagDef(TagDef):
+class Anchor(TagDef):
     tag_name = 'a'
-    allow_children = ['url', 'i']
+    allow_children = ['url', 'title', 'i', 'b', 's']
     #exclude_children = []
 
     def render_main(self):
-        #return 'This is the primary string of a'
         url = self.context.get('url')
-        return f'<a href="{url}">{self.content}</a>'
+        href = f' href="{url}"' if url else ''
 
-class URLTagDef(TagDef):
+        title = self.context.get('title')
+        title_str = f' title="{title}"' if title else ''
+
+        return f'<a{href}{title_str}>{self.content}</a>'
+
+class URLContext(TagDef):
     tag_name = 'url'
     is_context = True
-    allow_children = ['url2']
-
-    def process_data(self, data):
-        return 'processed ' + data[0]
-
-class URL2TagDef(TagDef): #TODO delthis, after testing
-    tag_name = 'url2'
-    #is_context = True #TODO makes no difference, maybe note in docs about how any tag that is a child of a context tag also gets treated like context
     allow_children = []
+
+    #def process_data(self, data):
+        # empty tag returns empty list
+        #return (data and data[0]) or '' # use first value in list if it exists
+
+class TitleContext(URLContext):
+    tag_name = 'title'
+

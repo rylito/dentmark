@@ -95,7 +95,8 @@ class TagDef:
     # can be overriden to customize or perform additional formatting on context tags
     # (i.e. looking up urls based on blog entry PKs)
     def process_data(self, data):
-        return data
+        # empty tag (with no children) returns empty list. Use first value in list if it exists as a sane default
+        return (data and data[0]) or ''
 
 
     def get_data(self):
@@ -182,13 +183,41 @@ class TagDef:
         return None
 
 
+    def gen_tags_by_name(self, tag_name):
+        if self.tag_name == tag_name:
+            yield self
+
+        for child in self.children:
+            if not child.is_element:
+                continue
+            for found in child.gen_tags_by_name(tag_name):
+                yield found
+
+    def get_child_by_name(self, tag_name, return_multiple=False):
+        multiple = []
+        for child in self.children:
+            if not child.is_element:
+                continue
+            if child.tag_name != tag_name:
+                continue
+            if not return_multiple:
+                return child
+            multiple.append(child)
+        return multiple if return_multiple else None
+
+
     # experiment with generating dentmark markup from the tree,
     # so that eventually we can edit the tree, then output modified dentmark
     def to_dentmark(self, indent_level = 0):
         children_str = ''
         for child in self.children:
-            children_str += child.to_dentmark(indent_level + 1)
+            children_str += child.to_dentmark(indent_level + (not self.is_root))
+        #tag_name = '' if self.is_root else self.tag_name
         tab = ' ' * (indent_level * 4)
         trim_left = '-' if self.trim_left else ''
         trim_right = '-' if self.trim_right else ''
-        return f'{tab}{trim_left}{self.tag_name}{trim_right}:\n{children_str}'
+
+        if self.is_root:
+            return f'{children_str}'
+        else:
+            return f'{tab}{trim_left}{self.tag_name}{trim_right}:\n{children_str}'

@@ -304,7 +304,9 @@ class Parser:
             prev_indent_level = indent_level
 
         # pick up last line
-        self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
+        #print(prev_indent_level, self.lowest_indent, prev_line_no)
+        if prev_line_no:
+            self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
 
         #print('lowest indent', self.lowest_indent)
         #print(self.stack, self.stack[-1].name)

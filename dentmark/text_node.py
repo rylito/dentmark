@@ -11,7 +11,7 @@ class TextNode:
         self.indent_level = indent_level
         self.parent = parent
         self.order = order
-        self.text = text
+        self.text = str(text) # make sure this is always a str to avoid errors when inserting/adding
 
     def walk(self):
         return self.text

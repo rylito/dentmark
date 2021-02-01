@@ -1,11 +1,9 @@
 class DefsManager:
     def __init__(self, defs_cls_list):
-        #self.defs_class_list = defs_class_list
         self.registered_tags = defs_cls_list
         self.pre_tag_names = []
         self.root_def = None
         self.tag_dict = self._build_tag_dict(defs_cls_list)
-        #self.root_def = RootTagDef()
         self._check()
 
     def _build_tag_dict(self, defs_cls_list):
@@ -34,24 +32,9 @@ class DefsManager:
 
 
     def _check(self):
-        #tag_set = set(self.tag_dict.keys())
         for tag_def in self.tag_dict.values():
             tag_def.check(self.tag_dict)
 
 
     def get_def(self, tag_name):
         return self.tag_dict.get(tag_name)
-        #try:
-            #return self.tag_dict[tag_name]
-        #except KeyError:
-            #raise Exception(f'Invalid tag. Definition for tag does not exist: {tag_name}')
-
-
-    #def is_child_allowed(self, parent_tag_name, child_tag_name):
-        #parent_tag_def = self.tag_dict[parent_tag_name]
-        #if parent_tag_def.is_pre:
-            #return False
-        #elif parent_tag_def.allow_children is not None:
-            #return child_tag_name in parent_tag_def.allow_children
-        #else:
-            #return child_tag_name not in parent_tag_def.exclude_children

@@ -14,10 +14,7 @@ class TagDef:
     # maybe use type or issubclasss instead?
     is_element = True
 
-    #def __init__(self, content, context={}, trim_left=False, trim_right=False):
     def __init__(self, line_no, indent_level, parent, order, nth_of_type, trim_left, trim_right):
-        #self.content = content
-        #self.context = context
         self.trim_left = trim_left
         self.trim_right = trim_right
 
@@ -47,7 +44,6 @@ class TagDef:
 
     @classmethod
     def is_child_allowed(cls, child_tag_name):
-        #parent_tag_def = self.tag_dict[parent_tag_name]
         if cls.is_pre:
             return False
         elif cls.allow_children is not None:
@@ -89,8 +85,8 @@ class TagDef:
         rep = ''
         for x in self.children:
             rep += x.walk() + ', '
-        #return f'[{self.trim_left}, {self.name}, {self.trim_right}, {rep[:-2]}]'
         return f'[{self.tag_name}, {rep[:-2]}]'
+
 
     # can be overriden to customize or perform additional formatting on context tags
     # (i.e. looking up urls based on blog entry PKs)
@@ -138,7 +134,6 @@ class TagDef:
         return self.render_main() if main else self.render_secondary()
 
 
-    #@abstractmethod
     def render_main(self):
         # TODO is this a sane default?
         return '' if self.is_context else self.content
@@ -170,7 +165,6 @@ class TagDef:
 
 
     def get_tag_by_id(self, tag_id):
-        #if self.tag_name == tag_name and self.nth_of_type == nth_of_type:
         if self.tag_id == tag_id:
             return self
 
@@ -212,7 +206,6 @@ class TagDef:
         children_str = ''
         for child in self.children:
             children_str += child.to_dentmark(indent_level + (not self.is_root))
-        #tag_name = '' if self.is_root else self.tag_name
         tab = ' ' * (indent_level * 4)
         trim_left = '-' if self.trim_left else ''
         trim_right = '-' if self.trim_right else ''

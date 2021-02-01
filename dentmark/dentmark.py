@@ -27,28 +27,18 @@ class Dentmark:
             if name.startswith('dentmark_')
         }
 
-    def list_defs(self): #TODO for testing, DELME
-        print(self.defs_manager.registered_tags)
-        print(self.defs_manager.tag_dict)
-        print(self.defs_manager.pre_tag_names)
 
     def parse(self, file_name_or_str):
         p = Parser(self.defs_manager, file_name_or_str)
         return p.parse()
 
+
     def render(self, file_name_or_str):
-        #p = Parser(self.defs_manager, file_name_or_str)
         root = self.parse(file_name_or_str)
         root.pre_render(root)
         rendered = root.render()
-        print('RENDERED')
-        print(rendered)
-        #render_tree = tree.pre_render()
-        #print(render_tree)
         return rendered
 
-    #def modify_test(self, file_name_or_str): #TODO testing DELME
-        #root = self.parse(file_name_or_str)
 
     def add_element(self, file_name_or_str, tag_id, new_tag_name, value):
         root = self.parse(file_name_or_str)

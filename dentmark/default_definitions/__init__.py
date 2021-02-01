@@ -4,14 +4,15 @@ from .headlines import H1, H2, H3, H4, H5, H6
 from .emphasis import Italic, Bold, StrikeThrough
 from .lists import OrderedList, UnorderedList, ListItem
 from .tables import Table, TableRow, TableCell, ColspanContext, RowspanContext, AlignContext
+from .images import Image, AltContext
+from .youtube import YouTubeEmbed, WidthContext, HeightContext
 
 from dentmark import TagDef
 
 class Root(TagDef):
     tag_name = 'root'
     is_root = True
-    #allow_children = ['p', 'a', 'code']
-    exclude_children = []
+    exclude_children = [] # exclude nothing (allow everything)
 
     def render_main(self):
         body = f'{self.content}'
@@ -22,21 +23,17 @@ class Root(TagDef):
         if fns_rendered:
             body += f'<section class="footnotes" role="doc-endnotes"><ol>{fns_rendered}</ol></section>'
 
-        #return f'{body}<footnotes>{fns_rendered}</footnotes>'
         return body
 
 class Pre(TagDef):
     tag_name = 'pre'
     is_pre = True
-    #is_root = True # for testing, remove this
 
-    #def render_main(self):
-        #return f'<p>{self.content}</p>'
+    def render_main(self):
+        return f'<pre>{self.content}</pre>'
 
 class Paragraph(TagDef):
     tag_name = 'p'
-    #exclude_children = []
-    #allow_children = ['a', 'a8n']
     exclude_children = ['p', 'li']
 
     def render_main(self):
@@ -79,4 +76,6 @@ REGISTERED_TAGS = (
     BlockQuote,
     HorizontalRule,
     Break,
+    Image, AltContext,
+    YouTubeEmbed, WidthContext, HeightContext,
 )

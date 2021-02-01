@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="dentmark-rylito", # Replace with your own username
+    name="dentmark-rylito",
     version="0.0.1",
     author="Ryli Dunlap",
     author_email="ryli@transvec.com",
-    description="Testing package structure",
+    description="An indentation-delimited, configurable markdown language",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://www.transvec.com",
+    url="https://www.transvec.com/dentmark",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

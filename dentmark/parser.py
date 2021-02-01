@@ -1,5 +1,4 @@
 import io
-#from dentmark.element_node import ElementNode
 from dentmark.text_node import TextNode
 
 # special character constants
@@ -11,16 +10,10 @@ COMMENT = '#'
 ELEMENT_DELIM = ':'
 VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_'
 
-# special tags (get this from settings in the future?)
-#PRE = 'pre'
 
 class Parser:
     def __init__(self, defs_manager, flo_or_str):
         self.defs_manager = defs_manager
-        #self.flo_or_str = flo_or_str
-        #self.template_manager = template_manager
-        #self.is_str = type(flo_or_str) is str
-        #print(self.is_str, type(file_name_or_str))
         self.stream = io.StringIO(flo_or_str) if type(flo_or_str) is str else flo_or_str
 
 
@@ -30,10 +23,6 @@ class Parser:
         count_whitespace = True
         self.is_comment = False
 
-        #flo = io.StringIO(self.file_name_or_str) if self.is_str else open(self.file_name_or_str, 'r')
-        #flo = io.StringIO(self.file_name_or_str) if self.is_str else self.file_name_or_str
-
-        #with open(self.file_name, 'r') as f:
         with self.stream as f:
             while True:
                 c = f.read(1)
@@ -98,27 +87,12 @@ class Parser:
         child_order = len(parent_node.children)
 
         if self.is_element:
-            #print('about to add', self.name_accum, 'last_stack_item', parent_node.name, 'count', child_order)
-            #template = self.template_manager.get_template(self.name_accum)
-            #if template is None:
-                #raise Exception(f'Template Does Not Exist For Element')
-                #print(f'Template Does Not Exist For Element (Assuming ctx for parent): {self.name_accum}')
-            #node = ElementNode(prev_line_no, prev_indent_level, parent_node, child_order, self.name_accum, self.trim_left, self.trim_right)
-
-            #print('PARENT', parent_node.tag_def.tag_name, 'CHILD', self.name_accum, 'IS_ALLOWED', parent_node.tag_def.is_child_allowed(self.name_accum))
-
             tag_def = self.defs_manager.get_def(self.name_accum)
             if tag_def is None:
                 raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {self.name_accum}')
-            #except KeyError:
-                ##print('do it')
-                #print(e)
-                #raise Exception('I ')
 
             if not parent_node.is_child_allowed(self.name_accum):
                 raise Exception(f"Child tag '{tag_def.tag_name}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
-
-            #node = ElementNode(prev_line_no, prev_indent_level, parent_node, child_order, tag_def, self.trim_left, self.trim_right)
 
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
@@ -129,14 +103,11 @@ class Parser:
             if self.pre_text_pending:
                 text = self._adjust_pre(self.line_accum, indent_level)
                 self.pre_text_pending = False
-                #print('print shit')
-                #print(repr(text))
             else:
                 first_element = self.first_accum.strip()
                 if first_element != '':
                     text = first_element
             if text is not None:
-                #print('putting', prev_line_no, prev_indent_level)
                 node.children.append(TextNode(prev_line_no, prev_indent_level, node, 0, text))
 
 
@@ -145,7 +116,6 @@ class Parser:
         else:
             node = TextNode(prev_line_no, prev_indent_level, parent_node, child_order, self.line_accum)
             parent_node.children.append(node)
-            #print('text_node', self.line_accum, 'parent', parent_node.name, 'ord', child_order)
 
         self.prev_processed = node
 
@@ -166,29 +136,23 @@ class Parser:
     def _check_name(self, c, is_start_of_line):
         if c == ELEMENT_DELIM:
             # validate name
-            #print('GOOD NAME', self.name_accum, self.trim_left, self.trim_right)
             self.track_name = False
             self.is_element = True
-            #if self.name_accum == PRE:
             if self.name_accum in self.defs_manager.pre_tag_names:
                 self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
                 if self.trim_right:
-                    # two --
                     self.track_name = False
-                    #print('2 dashes fail')
                 else:
                     self.trim_right = True
         elif c not in VALID_NAME_CHARS:
             # some invalid name char
             self.track_name = False
-            #print('invalid char in name')
         else:
             if self.trim_right:
                 # trailing char after the last dash
                 self.track_name = False
-                #print('trailing char after the last dash')
             else:
                 self.name_accum += c
 
@@ -224,13 +188,10 @@ class Parser:
 
         pre_text = '\n'.join(pre_text_split)
 
-        #print(pre_text)
         return pre_text
 
 
     def parse(self):
-        #root_template = self.template_manager.get_root_template()
-        #self.stack = [ElementNode.root(self.defs_manager.root_def)]
 
         self.counts = {}
 
@@ -247,15 +208,11 @@ class Parser:
         prev_indent_level = None
 
         for line_no, indent_level, c in self._each_char():
-            #print(line_no, indent_level, c)
 
             if self.pre_mode:
 
                 if pre_mode_begin:
                     if indent_level <= pre_mode_indent and c not in (SPACE, TAB, NEWLINE):
-                        #print('STOP THE PRESS')
-                        #print('line_accum', self.line_accum)
-                        #print(self.prev_processed.name)
 
                         self.pre_mode = False
                         pre_mode_indent = None
@@ -268,7 +225,6 @@ class Parser:
 
                     else:
                         self.line_accum += c
-                        #print('pre_mode_line_accum', self.line_accum)
                 elif c == NEWLINE:
                     pre_mode_begin = True
                     self.line_accum = ''
@@ -285,7 +241,6 @@ class Parser:
                 if prev_indent_level is None:
                     self.lowest_indent = indent_level
                 else:
-                    #print('doing append stack', prev_indent_level, indent_level, prev_line_no, line_no, c)
                     self._append_stack(prev_indent_level, indent_level, prev_line_no, line_no)
 
                 self._new_line(c)
@@ -296,7 +251,6 @@ class Parser:
                 self._check_name(c, is_start_of_line)
                 if self.pre_mode:
                     pre_mode_indent = indent_level
-                    #print('pre_mode prepared')
             elif self.is_element:
                 self.first_accum += c
 
@@ -304,16 +258,7 @@ class Parser:
             prev_indent_level = indent_level
 
         # pick up last line
-        #print(prev_indent_level, self.lowest_indent, prev_line_no)
         if prev_line_no:
             self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
 
-        #print('lowest indent', self.lowest_indent)
-        #print(self.stack, self.stack[-1].name)
-        print(self.stack[0].walk())
         return self.stack[0]
-
-
-#if __name__ == '__main__':
-    #Parser('test5.txt').parse()
-    ##parse('test.txt')

@@ -18,8 +18,6 @@ class FootNote(TagDef):
     allow_children = ['a', 'i']
 
     def render_main(self):
-        #return Fragment('fn', self.content)
-        #return 'this is the primary string of fn'
         return '' # don't render anything in-place
 
     def render_secondary(self):

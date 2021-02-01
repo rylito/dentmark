@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="dentmark-rylito",
+    name="dentmark",
     version="0.0.1",
     author="Ryli Dunlap",
     author_email="ryli@transvec.com",

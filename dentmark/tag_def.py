@@ -31,6 +31,7 @@ class TagDef:
         self.collectors = {}
         self.content = ''
         self.context = {}
+        self.extra_context = {}
 
         self.tag_id = f'{self.tag_name}-{self.nth_of_type}'
 
@@ -102,15 +103,18 @@ class TagDef:
         return {self.tag_name: self.process_data(child_data)}
 
 
-    def pre_render(self, root):
+    def pre_render(self, root, extra_context={}):
         for child in self.children:
-            child.pre_render(root)
+            child.pre_render(root, extra_context)
 
         if self.is_context:
             self.parent.context.update(self.get_data())
 
+        self.extra_context = extra_context
+
         if self.add_to_collector:
             root.collectors.setdefault(self.tag_name, []).append(self.render(False))
+
         print(self.tag_name, self.context, self.collectors, self.order, self.nth_of_type)
 
 

@@ -21,12 +21,12 @@ class TextNode:
     def get_data(self):
         return self.text
 
-    def pre_render(self, root):
+    def pre_render(self, root=None, extra_context={}): # args don't do anything, just so this has same interface as TagDef
         # Nothing needs to be done here, but method necessary since TextNode and TagDef have same interface
         pass
 
-    def render(self, main):
-        return self.get_enhanced_text()
+    def render(self, main=None): # main arg doesn't do anything here - just so this has same interface as TagDef
+        return self.get_enhanced_text() if not self.parent.is_pre else self.text
 
     def get_enhanced_text(self):
         # Inserts 'fancy' left and right quotes as well as some other typographic enhancements

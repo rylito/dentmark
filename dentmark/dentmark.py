@@ -33,9 +33,9 @@ class Dentmark:
         return p.parse()
 
 
-    def render(self, file_name_or_str):
+    def render(self, file_name_or_str, extra_context={}):
         root = self.parse(file_name_or_str)
-        root.pre_render(root)
+        root.pre_render(root, extra_context)
         rendered = root.render()
         return rendered
 

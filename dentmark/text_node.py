@@ -26,7 +26,8 @@ class TextNode:
         pass
 
     def render(self, main=None): # main arg doesn't do anything here - just so this has same interface as TagDef
-        return self.get_enhanced_text() if not self.parent.is_pre else self.text
+        # TODO Do we really need this .strip() here?
+        return self.get_enhanced_text().strip() if not self.parent.is_pre else self.text
 
     def get_enhanced_text(self):
         # Inserts 'fancy' left and right quotes as well as some other typographic enhancements

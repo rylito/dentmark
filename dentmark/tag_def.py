@@ -123,7 +123,7 @@ class TagDef:
         prev_child = None
 
         for child in self.children:
-            child_rendered = child.render(main).strip()
+            child_rendered = child.render(main)
 
             if child_rendered:
                 no_whitespace = (prev_child and prev_child.trim_right) or child.trim_left

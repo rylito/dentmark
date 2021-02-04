@@ -71,7 +71,6 @@ class Parser:
 
 
     def _append_stack(self, prev_indent_level, indent_level, prev_line_no, line_no):
-
         if indent_level < self.lowest_indent:
             self._indentation_error(line_no)
 
@@ -158,8 +157,9 @@ class Parser:
 
 
     def _adjust_pre(self, pre_text, trailing_indent):
-        # the +1 is to remove the trailing \n
-        pre_text = pre_text[:-(trailing_indent + 1)]
+        if trailing_indent:
+            # the +1 is to remove the trailing \n
+            pre_text = pre_text[:-(trailing_indent + 1)]
         pre_text_split = pre_text.splitlines()
 
         smallest = None
@@ -174,6 +174,8 @@ class Parser:
             for c in x:
                 if c == ' ':
                     count += 1
+                else:
+                    break
 
             if x.strip() != '':
                 if smallest is None or count < smallest:
@@ -259,6 +261,8 @@ class Parser:
 
         # pick up last line
         if prev_line_no:
+            if self.pre_mode:
+                self.pre_text_pending = True
             self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
 
         return self.stack[0]

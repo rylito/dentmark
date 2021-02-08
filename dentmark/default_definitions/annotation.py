@@ -9,7 +9,7 @@ class Annotation(TagDef):
         sup_id = f'fnref:{nth_of_type}'
         href = f'#fn:{nth_of_type}'
 
-        return f'<span class="some_class">{self.content}</span><sup id="{sup_id}"><a href="{href}" class="footnote-ref" role="doc-noteref">[{nth_of_type}]</a></sup>'
+        return f'<span class="dm__a8n">{self.content}</span><sup id="{sup_id}"><a href="{href}" class="footnote-ref" role="doc-noteref">[{nth_of_type}]</a></sup>'
 
 
 class FootNote(TagDef):

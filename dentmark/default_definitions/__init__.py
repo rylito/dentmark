@@ -34,7 +34,7 @@ class Pre(TagDef):
 
 class Paragraph(TagDef):
     tag_name = 'p'
-    exclude_children = ['p', 'li']
+    exclude_children = ['p', 'li', 'bq']
 
     def render_main(self):
         return f'<p>{self.content}</p>'

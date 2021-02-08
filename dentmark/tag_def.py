@@ -115,8 +115,6 @@ class TagDef:
         if self.add_to_collector:
             root.collectors.setdefault(self.tag_name, []).append(self.render(False))
 
-        print(self.tag_name, self.context, self.collectors, self.order, self.nth_of_type)
-
 
     def render(self, main=True):
         rendered_children = []

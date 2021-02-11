@@ -1,4 +1,5 @@
 import io
+import re
 from dentmark.text_node import TextNode
 
 # special character constants
@@ -9,6 +10,8 @@ TRIM = '-'
 COMMENT = '#'
 ELEMENT_DELIM = ':'
 VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_'
+
+TAG_NAME_PATTERN = re.compile(fr'^\s*[{VALID_NAME_CHARS}]+:')
 
 
 class Parser:
@@ -57,6 +60,7 @@ class Parser:
         self.is_element = False
         self.trim_left = (c == TRIM)
         self.trim_right = False
+        self.escaped = False
 
 
     def _rollup(self):
@@ -113,7 +117,27 @@ class Parser:
             self.stack.append(node)
 
         else:
-            node = TextNode(prev_line_no, prev_indent_level, parent_node, child_order, self.line_accum)
+            text = self.line_accum
+            if self.escaped:
+                m = TAG_NAME_PATTERN.match(text)
+                if m:
+                    # use strip() here to remove any leading whitespace on escaped lines, i.e.
+                    #
+                    # p:
+                    #     : Sarah: hello
+                    #     : Bob: hello
+                    #      ^ strip this
+                    text = text.strip()
+                else:
+                    # line doesn't need to be escaped. Replace the leading ':' and just treat as literal text, i.e.
+                    # :
+                    # : iNvAlIdTagName: some other text
+                    # : notag : some othe text
+
+                    text = ELEMENT_DELIM + text
+                    self.escaped = False
+
+            node = TextNode(prev_line_no, prev_indent_level, parent_node, child_order, text, self.escaped)
             parent_node.children.append(node)
 
         self.prev_processed = node
@@ -136,9 +160,24 @@ class Parser:
         if c == ELEMENT_DELIM:
             # validate name
             self.track_name = False
-            self.is_element = True
-            if self.name_accum in self.defs_manager.pre_tag_names:
-                self.pre_mode = True
+
+            # Don't treat as tag if only ':'.
+            # Trim ':' and treat as line so that text
+            # lines that start with non-tag names can be escaped. For example:
+            #
+            # p:
+            #    :Bob: Hello
+            #    br:
+            #    :Sarah: Hi Bob!
+
+            if self.name_accum == '':
+                # just reset line_accum to drop the ':'
+                self.escaped = True
+                self.line_accum = ''
+            else:
+                self.is_element = True
+                if self.name_accum in self.defs_manager.pre_tag_names:
+                    self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
                 if self.trim_right:

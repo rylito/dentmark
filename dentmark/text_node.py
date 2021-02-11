@@ -8,12 +8,13 @@ class TextNode:
     trim_left = False
     trim_right = False
 
-    def __init__(self, line_no, indent_level, parent, order, text):
+    def __init__(self, line_no, indent_level, parent, order, text, escaped=False):
         self.line_no = line_no
         self.indent_level = indent_level
         self.parent = parent
         self.order = order
         self.text = str(text) # make sure this is always a str to avoid errors when inserting/adding
+        self.escaped = escaped # whether this text was prefixed with ':' to not have it considered a tag
 
     def walk(self):
         return self.text
@@ -26,8 +27,9 @@ class TextNode:
         pass
 
     def render(self, main=None): # main arg doesn't do anything here - just so this has same interface as TagDef
-        # TODO Do we really need this .strip() here?
+        # TODO Do we really need this .strip() here? Leave it for now since I don't think it's hurting anything
         return self.get_enhanced_text().strip() if not self.parent.is_pre else self.text
+        #return self.get_enhanced_text() if not self.parent.is_pre else self.text
 
     def get_enhanced_text(self):
         # Inserts 'fancy' left and right quotes as well as some other typographic enhancements
@@ -68,10 +70,12 @@ class TextNode:
 
     def to_dentmark(self, indent_level):
         tab = ' ' * (indent_level * 4)
-        text = tab + self.text
 
         if self.parent.is_pre:
             split = self.text.split('\n')
             text = '\n'.join([tab + _ for _ in split])
+        else:
+            escape = ': ' if self.escaped else ''
+            text = tab + escape + self.text
 
         return text + '\n'

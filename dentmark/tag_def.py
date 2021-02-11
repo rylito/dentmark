@@ -205,9 +205,22 @@ class TagDef:
     # experiment with generating dentmark markup from the tree,
     # so that eventually we can edit the tree, then output modified dentmark
     def to_dentmark(self, indent_level = 0):
-        children_str = ''
-        for child in self.children:
+
+        # make sure tags with no children like br: have a trailing newline
+        children_str = '' if self.children else '\n'
+
+        for i, child in enumerate(self.children):
+            if i == 0:
+                if (not self.is_pre) and (not child.is_element):
+                    # If first child is a text node, print it inline with tag to preserve
+                    # intentional 'tag masking' i.e. a: https://
+                    # This also saves space anyways even if tag masking is not necessary.
+                    children_str += f' {child.text}\n'
+                    continue
+                children_str += '\n'
+
             children_str += child.to_dentmark(indent_level + (not self.is_root))
+
         tab = ' ' * (indent_level * 4)
         trim_left = '-' if self.trim_left else ''
         trim_right = '-' if self.trim_right else ''
@@ -215,4 +228,4 @@ class TagDef:
         if self.is_root:
             return f'{children_str}'
         else:
-            return f'{tab}{trim_left}{self.tag_name}{trim_right}:\n{children_str}'
+            return f'{tab}{trim_left}{self.tag_name}{trim_right}:{children_str}'

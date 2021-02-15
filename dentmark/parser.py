@@ -11,7 +11,6 @@ COMMENT = '#'
 ELEMENT_DELIM = ':'
 VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_'
 
-TAG_NAME_PATTERN = re.compile(fr'^\s*[{VALID_NAME_CHARS}]+:')
 
 
 class Parser:
@@ -117,25 +116,13 @@ class Parser:
             self.stack.append(node)
 
         else:
-            text = self.line_accum
-            if self.escaped:
-                m = TAG_NAME_PATTERN.match(text)
-                if m:
-                    # use strip() here to remove any leading whitespace on escaped lines, i.e.
-                    #
-                    # p:
-                    #     : Sarah: hello
-                    #     : Bob: hello
-                    #      ^ strip this
-                    text = text.strip()
-                else:
-                    # line doesn't need to be escaped. Replace the leading ':' and just treat as literal text, i.e.
-                    # :
-                    # : iNvAlIdTagName: some other text
-                    # : notag : some othe text
-
-                    text = ELEMENT_DELIM + text
-                    self.escaped = False
+            # use strip() here to remove any leading whitespace on escaped lines, i.e.
+            #
+            # p:
+            #     : sarah: hello
+            #     : bob: hello
+            #      ^ strip this
+            text = self.line_accum.strip()
 
             node = TextNode(prev_line_no, prev_indent_level, parent_node, child_order, text, self.escaped)
             parent_node.children.append(node)
@@ -166,9 +153,9 @@ class Parser:
             # lines that start with non-tag names can be escaped. For example:
             #
             # p:
-            #    :Bob: Hello
+            #    : bob: Hello
             #    br:
-            #    :Sarah: Hi Bob!
+            #    : sarah: Hi Bob!
 
             if self.name_accum == '':
                 # just reset line_accum to drop the ':'

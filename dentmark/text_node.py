@@ -69,6 +69,11 @@ class TextNode:
 
 
     def to_dentmark(self, indent_level):
+        # don't print empty escaped lines i.e
+        # :
+        if self.escaped and not self.text:
+            return ''
+
         tab = ' ' * (indent_level * 4)
 
         if self.parent.is_pre:

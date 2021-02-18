@@ -2,7 +2,14 @@ from dentmark import TagDef
 
 class Anchor(TagDef):
     tag_name = 'a'
-    allow_children = ['url', 'title', 'i', 'b', 's']
+
+    allow_children = ['url', 'title']
+
+    unique_children = ['url', 'title']
+
+    min_num_children = 1
+    max_num_children = 1
+
 
     def render_main(self):
         url = self.context.get('url')
@@ -21,6 +28,9 @@ class URLContext(TagDef):
     tag_name = 'url'
     is_context = True
     allow_children = []
+
+    min_num_children = 1
+    max_num_children = 1
 
 
 class TitleContext(URLContext):

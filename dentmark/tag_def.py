@@ -11,6 +11,14 @@ class TagDef:
     allow_children = None
     exclude_children = None
 
+    required_children = []
+    unique_children = []
+
+    # does not include context tags in the count
+    min_num_children = 0
+    max_num_children = None
+
+
     # maybe use type or issubclasss instead?
     is_element = True
 
@@ -52,33 +60,68 @@ class TagDef:
         else:
             return child_tag_name not in cls.exclude_children
 
+
     @classmethod
     def check(cls, tag_dict):
-        allow_val = cls.allow_children
-        exclude_val = cls.exclude_children
-
         def_ref = f"TagDef '{cls.__name__}'"
 
-        for val, attr in ((allow_val, 'allow_children'), (exclude_val, 'exclude_children')):
+        allow_def = ('allow_children', cls.allow_children)
+        exclude_def = ('exclude_children', cls.exclude_children)
+
+        required_def = ('required_children', cls.required_children)
+        unique_def = ('unique_children', cls.unique_children)
+
+        def check_defined_tags(attr_name, tag_names):
+            if tag_names:
+                unknown_set = set(tag_names).difference(tag_dict)
+                if unknown_set:
+                    raise Exception(f"{def_ref} contains undefined tag names in {attr_name}: {unknown_set}")
+
+        for attr_name, val in (allow_def, exclude_def, required_def, unique_def):
             if val is not None and type(val) not in (list, tuple):
-                raise Exception(f'{def_ref} specifies invalid value for {attr}. Must be None or tuple/list of tag names')
+                raise Exception(f'{def_ref} specifies invalid value for {attr_name}. Must be None or tuple/list of tag names')
+
+        # check allow_children / exclude_children
 
         if cls.is_pre:
             #if allow_val or (exclude_val is False) or (exclude_val and exclude_val_type is not bool):
-            if allow_val or exclude_val is not None:
+            if allow_def[1] or exclude_def[1] is not None:
                 raise Exception(f'{def_ref} has is_pre=True. Pre tags cannot have children and exclude all tags by default. Remove the allow/exclude_children values from this def to use the default or explicitly set allow_children=[]')
-        elif allow_val is None and exclude_val is None:
+        elif allow_def[1] is None and exclude_def[1] is None:
             raise Exception(f'{def_ref} must specify a value for either allow_children OR exclude_children')
-        elif (allow_val is not None and exclude_val is not None):
+        elif (allow_def[1] is not None and exclude_def[1] is not None):
             raise Exception(f'{def_ref} must specify a value for either allow_children OR exclude_children, not both')
         else:
-            check_list = allow_val or exclude_val
-            if check_list:
-                # TODO use set.difference for this?
-                for tag_name in check_list:
-                    if tag_name not in tag_dict:
-                        attr_name = 'allow' if check_list is allow_val else 'exclude'
-                        raise Exception(f"{def_ref} contains an undefined tag name in {attr_name}_children: '{tag_name}'")
+            check_defined_tags(*(allow_def if allow_def[1] else exclude_def))
+
+        # check required_children / unique_children agree with allow_children / exclude_children
+        for attr_name, val in (required_def, unique_def):
+            if val:
+                # check that tag definiton exists
+                check_defined_tags(attr_name, val)
+
+                # check that it's allowed as a child
+                for tag_name in val:
+                    if not cls.is_child_allowed(tag_name):
+                        raise Exception(f'{def_ref} specifies a child tag in {attr_name} that is not allowed as a child: {tag_name}')
+
+        # check min_num_children / max_num_children
+        min_children = cls.min_num_children
+        max_children = cls.max_num_children
+
+        if type(min_children) is not int or min_children < 0:
+            raise Exception(f'{def_ref} min_num_children must be an int >= 0')
+
+        if max_children is not None and ((type(max_children) is not int) or max_children < 0):
+            raise Exception(f'{def_ref} max_num_children must be an int >= 0 or None')
+
+        if max_children is not None and max_children < min_children:
+            raise Exception(f'{def_ref} max_num_children of {max_children} is less than min_num_children of {min_children}')
+
+        #num_required = len(required_def[1]) if required_def[1] else 0
+
+        #if min_children < num_required:
+            #raise Exception(f'{def_ref} min_num_children of {min_children} should be >= {num_required} since there are {num_required} {required_def[0]}')
 
 
     #TODO useful for debugging, but not actually used in the rendering process
@@ -96,11 +139,51 @@ class TagDef:
         return (data and data[0]) or ''
 
 
+    # Can be overridden to customize or perform additional validation at parse time.
+    # If it returns a non-empty string, an exception will be raised
+    def validate(self):
+        pass
+
+
     def get_data(self):
         child_data = []
         for child in self.children:
             child_data.append(child.get_data())
-        return {self.tag_name: self.process_data(child_data)}
+        #return {self.tag_name: self.process_data(child_data)}
+        return self.process_data(child_data)
+
+
+    # enforces required_children, unique_children, and min/max_num_children
+    def check_children(self):
+        seen = set()
+        non_context_count = 0
+        for child in self.children:
+            if child.is_element:
+                if child.tag_name in self.unique_children:
+                    if child.tag_name in seen:
+                        raise Exception(f"Tag '{self.tag_name}' does not allow multiple children of type '{child.tag_name}': line {child.line_no}")
+                seen.add(child.tag_name)
+
+                if child.is_context:
+                    continue # do not add this to the count
+
+            non_context_count += 1
+
+        if self.required_children:
+            missing = set(self.required_children).difference(seen)
+            if missing:
+                raise Exception(f"Tag '{self.tag_name}' missing required child tags {missing}: line {self.line_no}")
+
+        if non_context_count < self.min_num_children:
+            raise Exception(f"Tag '{self.tag_name}' has {non_context_count} non-context children nodes but expects at least {self.min_num_children}: line {self.line_no}")
+
+        if self.max_num_children is not None:
+            if non_context_count > self.max_num_children:
+                raise Exception(f"Tag '{self.tag_name}' has {non_context_count} non-context children nodes but expects no more than {self.max_num_children}: line {self.line_no}")
+
+        validate = self.validate()
+        if validate:
+            raise Exception(f'{validate}: line {self.line_no}')
 
 
     def pre_render(self, root, extra_context={}):
@@ -108,7 +191,7 @@ class TagDef:
             child.pre_render(root, extra_context)
 
         if self.is_context:
-            self.parent.context.update(self.get_data())
+            self.parent.context.update({self.tag_name: self.get_data()})
 
         self.extra_context = extra_context
 
@@ -153,6 +236,7 @@ class TagDef:
 
         if tag_name not in self.allow_children:
             def_ref = f"TagDef '{self.__class__.__name__}'"
+
             raise Exception(f"Child tag '{tag_name}' not allowed as child of {def_ref}")
 
         # TODO just use None for values that can't be calculated. A bit hackish, but will

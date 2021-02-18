@@ -2,7 +2,7 @@ from dentmark import TagDef
 
 
 class List(TagDef):
-    allow_children = ['li'] # maybe b, i, a?
+    allow_children = ['li']
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'

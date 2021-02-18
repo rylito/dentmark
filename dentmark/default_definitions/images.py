@@ -7,10 +7,13 @@ class Image(TagDef):
     # the same configuration
     allow_children = ['title', 'alt']
 
+    unique_children = ['title', 'alt']
+
+    min_num_children = 1
+    max_num_children = 1
+
     def render_main(self):
         # use first child as src
-        # TODO better validation to enforce that this tag should have one
-        # and only one TextNode child?
         src = self.content
 
         attrs = ''
@@ -25,3 +28,7 @@ class AltContext(TagDef):
     tag_name = 'alt'
     is_context = True
     allow_children = []
+
+    min_num_children = 1
+    max_num_children = 1
+

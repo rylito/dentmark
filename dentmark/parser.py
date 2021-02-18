@@ -64,6 +64,7 @@ class Parser:
 
     def _rollup(self):
         popped = self.stack.pop()
+        popped.check_children()
         tail = self.stack[-1]
         tail.children.append(popped)
         return popped
@@ -290,5 +291,7 @@ class Parser:
             if self.pre_mode:
                 self.pre_text_pending = True
             self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
+
+        self.stack[0].check_children() # check the root node to make sure its children are valid
 
         return self.stack[0]

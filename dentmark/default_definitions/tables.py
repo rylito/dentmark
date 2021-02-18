@@ -11,24 +11,27 @@ class TableRow(TagDef):
     tag_name = 'tr'
     allow_children = ['td']
 
+    def validate(self):
+        for child in self.children:
+            if not child.is_element:
+                return 'tr tag does not allow text nodes. Only td tags are allowed as children'
+
     def render_main(self):
-        #TODO figure out how to exclude text nodes
-        #filter_content = [_ for _ in self.content if _.is_element]
         return f'<tr>{self.content}</tr>'
 
 class TableCell(TagDef):
     tag_name = 'td'
 
     #TODO probably should allow links and some other tags too
-    allow_children = ['colspan', 'rowspan', 'align']
+    allow_children = ['colspan', 'rowspan', 'align', 'a', 'b', 's', 'i']
+
+    unique_children = ['colspan', 'rowspan', 'align']
 
 
     def render_main(self):
         colspan = self.context.get('colspan')
         rowspan = self.context.get('rowspan')
 
-        #TODO better validation to make sure this is one of the
-        # allowed values: right, left, center, etc.
         align = self.context.get('align')
 
         attrs = ''
@@ -45,12 +48,22 @@ class ColspanContext(TagDef):
     is_context = True
     allow_children = []
 
-class RowspanContext(TagDef):
-    tag_name = 'rowspan'
-    is_context = True
-    allow_children = []
+    min_num_children = 1
+    max_num_children = 1
 
-class AlignContext(TagDef):
+
+class RowspanContext(ColspanContext):
+    tag_name = 'rowspan'
+
+
+class AlignContext(ColspanContext):
     tag_name = 'align'
-    is_context = True
-    allow_children = []
+
+    def process_data(self, data):
+        return data[0].lower()
+
+    def validate(self):
+        val = self.get_data()
+
+        if val not in ('left', 'right', 'center'):
+            return 'value for align must be: left, right, or center'

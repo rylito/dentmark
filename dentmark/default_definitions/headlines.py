@@ -1,7 +1,7 @@
 from dentmark import TagDef
 
 class Headline(TagDef):
-    allow_children = [] # maybe b, i, a?
+    allow_children = []
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'

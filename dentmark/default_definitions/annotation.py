@@ -1,5 +1,10 @@
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+@def_tag_set.register()
 class Annotation(TagDef):
     tag_name = 'a8n'
     allow_children = ['fn']
@@ -11,7 +16,7 @@ class Annotation(TagDef):
 
         return f'<span class="dm__a8n">{self.content}</span><sup id="{sup_id}"><a href="{href}" class="footnote-ref" role="doc-noteref">[{nth_of_type}]</a></sup>'
 
-
+@def_tag_set.register()
 class FootNote(TagDef):
     tag_name = 'fn'
     add_to_collector = True

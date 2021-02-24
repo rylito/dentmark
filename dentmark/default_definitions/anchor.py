@@ -1,5 +1,11 @@
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+
+@def_tag_set.register()
 class Anchor(TagDef):
     tag_name = 'a'
 
@@ -24,6 +30,7 @@ class Anchor(TagDef):
 
         return f'<a{href}{title_str}>{self.content}</a>'
 
+@def_tag_set.register()
 class URLContext(TagDef):
     tag_name = 'url'
     is_context = True
@@ -32,7 +39,7 @@ class URLContext(TagDef):
     min_num_children = 1
     max_num_children = 1
 
-
+@def_tag_set.register()
 class TitleContext(URLContext):
     tag_name = 'title'
 

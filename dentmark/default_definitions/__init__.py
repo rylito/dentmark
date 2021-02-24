@@ -1,14 +1,28 @@
-from .anchor import Anchor, URLContext, TitleContext
-from .annotation import Annotation, FootNote
-from .headlines import H1, H2, H3, H4, H5, H6
-from .emphasis import Italic, Bold, StrikeThrough
-from .lists import OrderedList, UnorderedList, ListItem
-from .tables import Table, TableRow, TableCell, ColspanContext, RowspanContext, AlignContext
-from .images import Image, AltContext
-from .youtube import YouTubeEmbed, WidthContext, HeightContext
+#from .anchor import Anchor, URLContext, TitleContext
+import dentmark.default_definitions.anchor
+#from .annotation import Annotation, FootNote
+import dentmark.default_definitions.annotation
+#from .headlines import H1, H2, H3, H4, H5, H6
+import dentmark.default_definitions.headlines
+#from .emphasis import Italic, Bold, StrikeThrough
+import dentmark.default_definitions.emphasis
+#from .lists import OrderedList, UnorderedList, ListItem
+import dentmark.default_definitions.lists
+#from .tables import Table, TableRow, TableCell, ColspanContext, RowspanContext, AlignContext
+import dentmark.default_definitions.tables
+#from .images import Image, AltContext
+import dentmark.default_definitions.images
+#from .youtube import YouTubeEmbed, WidthContext, HeightContext
+import dentmark.default_definitions.youtube
 
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+
+@def_tag_set.register()
 class Root(TagDef):
     tag_name = 'root'
     is_root = True
@@ -25,6 +39,7 @@ class Root(TagDef):
 
         return body
 
+@def_tag_set.register()
 class Pre(TagDef):
     tag_name = 'pre'
     is_pre = True
@@ -32,6 +47,7 @@ class Pre(TagDef):
     def render_main(self):
         return f'<pre>{self.content}</pre>'
 
+@def_tag_set.register()
 class Paragraph(TagDef):
     tag_name = 'p'
     exclude_children = ['p', 'li', 'bq']
@@ -39,6 +55,7 @@ class Paragraph(TagDef):
     def render_main(self):
         return f'<p>{self.content}</p>'
 
+@def_tag_set.register()
 class BlockQuote(TagDef):
     tag_name = 'bq'
     allow_children = ['p', 'b', 's', 'i'] # TODO probably some others too
@@ -46,6 +63,7 @@ class BlockQuote(TagDef):
     def render_main(self):
         return f'<blockquote>{self.content}</blockquote>'
 
+@def_tag_set.register()
 class HorizontalRule(TagDef):
     tag_name = 'hr'
     allow_children = []
@@ -54,6 +72,7 @@ class HorizontalRule(TagDef):
     def render_main(self):
         return '<hr/>'
 
+@def_tag_set.register()
 class Break(TagDef):
     tag_name = 'br'
     allow_children = []
@@ -62,7 +81,7 @@ class Break(TagDef):
     def render_main(self):
         return '<br/>'
 
-
+'''
 REGISTERED_TAGS = (
     Root,
     H1, H2, H3, H4, H5, H6,
@@ -79,3 +98,4 @@ REGISTERED_TAGS = (
     Image, AltContext,
     YouTubeEmbed, WidthContext, HeightContext,
 )
+'''

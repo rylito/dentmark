@@ -14,8 +14,8 @@ VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_-'
 
 
 class Parser:
-    def __init__(self, defs_manager, flo_or_str):
-        self.defs_manager = defs_manager
+    def __init__(self, defs_set, flo_or_str):
+        self.defs_set = defs_set
         self.stream = io.StringIO(flo_or_str) if type(flo_or_str) is str else flo_or_str
 
 
@@ -90,7 +90,7 @@ class Parser:
         child_order = len(parent_node.children)
 
         if self.is_element:
-            tag_def = self.defs_manager.get_def(self.name_accum)
+            tag_def = self.defs_set.get_def(self.name_accum)
             if tag_def is None:
                 raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {self.name_accum}')
 
@@ -169,7 +169,7 @@ class Parser:
                 if self.name_accum[-1] == TRIM:
                     self.name_accum = self.name_accum[:-1]
 
-                if self.name_accum in self.defs_manager.pre_tag_names:
+                if self.name_accum in self.defs_set.pre_tag_names:
                     self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
@@ -221,10 +221,12 @@ class Parser:
 
 
     def parse(self):
+        # make sure def set is checked
+        self.defs_set.check()
 
         self.counts = {}
 
-        self.stack = [self.defs_manager.root_def.init_as_root()]
+        self.stack = [self.defs_set.root_def.init_as_root()]
         self.prev_processed = None
         self.lowest_indent = None
 

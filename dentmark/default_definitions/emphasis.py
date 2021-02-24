@@ -1,19 +1,27 @@
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+#@def_tag_set.register()
 class Emphasis(TagDef):
     allow_children = ['a', 'b', 's', 'i']
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'
 
+@def_tag_set.register()
 class Italic(Emphasis):
     tag_name = 'i'
 
 
+@def_tag_set.register()
 class Bold(Emphasis):
     tag_name = 'b'
 
 
+@def_tag_set.register()
 class StrikeThrough(Emphasis):
     tag_name = 's'
 

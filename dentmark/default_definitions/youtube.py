@@ -1,5 +1,11 @@
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+
+@def_tag_set.register()
 class YouTubeEmbed(TagDef):
     tag_name = 'youtube'
     allow_children = ['width', 'height']
@@ -20,6 +26,7 @@ class YouTubeEmbed(TagDef):
         return f'<iframe width="{width}" height="{height}" src="{src}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>'
 
 
+@def_tag_set.register()
 class WidthContext(TagDef):
     tag_name = 'width'
     is_context = True
@@ -34,5 +41,7 @@ class WidthContext(TagDef):
         if not val.isdigit():
             return f"Tag '{self.tag_name}' expects a positive integer"
 
+
+@def_tag_set.register()
 class HeightContext(WidthContext):
     tag_name = 'height'

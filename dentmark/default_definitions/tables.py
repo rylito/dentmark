@@ -1,5 +1,11 @@
-from dentmark import TagDef
+from dentmark.tag_def import TagDef
 
+from dentmark.dentmark import defs_manager
+def_tag_set = defs_manager.get_tag_set()
+
+
+
+@def_tag_set.register()
 class Table(TagDef):
     tag_name = 'table'
     allow_children = ['tr']
@@ -7,6 +13,8 @@ class Table(TagDef):
     def render_main(self):
         return f'<table border="1">{self.content}</table>'
 
+
+@def_tag_set.register()
 class TableRow(TagDef):
     tag_name = 'tr'
     allow_children = ['td']
@@ -19,6 +27,8 @@ class TableRow(TagDef):
     def render_main(self):
         return f'<tr>{self.content}</tr>'
 
+
+@def_tag_set.register()
 class TableCell(TagDef):
     tag_name = 'td'
 
@@ -43,6 +53,7 @@ class TableCell(TagDef):
         return f'<td{attrs}>{self.content}</td>'
 
 
+@def_tag_set.register()
 class ColspanContext(TagDef):
     tag_name = 'colspan'
     is_context = True
@@ -52,10 +63,12 @@ class ColspanContext(TagDef):
     max_num_children = 1
 
 
+@def_tag_set.register()
 class RowspanContext(ColspanContext):
     tag_name = 'rowspan'
 
 
+@def_tag_set.register()
 class AlignContext(ColspanContext):
     tag_name = 'align'
 

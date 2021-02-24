@@ -135,8 +135,12 @@ class TagDef:
     # can be overriden to customize or perform additional formatting on context tags
     # (i.e. looking up urls based on blog entry PKs)
     def process_data(self, data):
-        # empty tag (with no children) returns empty list. Use first value in list if it exists as a sane default
-        return (data and data[0]) or ''
+        if self.max_num_children == 0:
+            return None
+        elif self.max_num_children == 1:
+            return data[0]
+        else:
+            return data
 
 
     # Can be overridden to customize or perform additional validation at parse time.

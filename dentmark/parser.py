@@ -9,7 +9,7 @@ SPACE = ' '
 TRIM = '-'
 COMMENT = '#'
 ELEMENT_DELIM = ':'
-VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_'
+VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_-'
 
 
 
@@ -164,23 +164,23 @@ class Parser:
                 self.line_accum = ''
             else:
                 self.is_element = True
+
+                # remove trailing '-' from name if present
+                if self.name_accum[-1] == TRIM:
+                    self.name_accum = self.name_accum[:-1]
+
                 if self.name_accum in self.defs_manager.pre_tag_names:
                     self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
-                if self.trim_right:
-                    self.track_name = False
-                else:
-                    self.trim_right = True
+                self.trim_right = True
+                self.name_accum += c
         elif c not in VALID_NAME_CHARS:
             # some invalid name char
             self.track_name = False
         else:
-            if self.trim_right:
-                # trailing char after the last dash
-                self.track_name = False
-            else:
-                self.name_accum += c
+            self.trim_right = False
+            self.name_accum += c
 
 
     def _adjust_pre(self, pre_text, trailing_indent):

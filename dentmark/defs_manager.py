@@ -16,16 +16,19 @@ class DefSet:
     #def empty(self):
         #return not self.tag_dict
 
-    def register_tag(self, tag_cls, replace=False):
+    # tag_name arg allows us to create tags dynamically (i.e. tags assigned named at parse time, so multiple tag names can use same cls)
+    def register_tag(self, tag_cls, replace=False, tag_name=None):
         print('registering', tag_cls)
 
-        if not tag_cls.tag_name:
+        use_name = tag_cls.tag_name if tag_cls.tag_name is not None else tag_name
+
+        if not use_name:
             raise Exception(f"tag_name not defined for: '{tag_cls.__name__}'")
 
         if not replace:
-            existing_tag_for_name = self.tag_dict.get(tag_cls.tag_name)
+            existing_tag_for_name = self.tag_dict.get(use_name)
             if existing_tag_for_name is not None:
-                raise Exception(f"Duplicate tag name '{tag_cls.tag_name}' defined by '{existing_tag_for_name.__name__}' and '{tag_cls.__name__}'")
+                raise Exception(f"Duplicate tag name '{use_name}' defined by '{existing_tag_for_name.__name__}' and '{tag_cls.__name__}'")
 
         if tag_cls.is_root:
             if self.root_def and not replace:
@@ -33,7 +36,7 @@ class DefSet:
             else:
                 self.root_def = tag_cls
 
-        self.tag_dict[tag_cls.tag_name] = tag_cls
+        self.tag_dict[use_name] = tag_cls
 
         if tag_cls.is_pre:
             self.pre_tag_names.append(tag_cls.tag_name)
@@ -94,7 +97,7 @@ class DefSet:
         self._is_checked = True
 
 
-    def get_def(self, tag_name):
+    def get_def(self, tag_name, parent_node): # parent node not used here, but useful if this class is extended
         #assert self._is_checked, 'tags have not been checked. Danger everywhere.' #TODO DELME
         return self.tag_dict.get(tag_name)
 

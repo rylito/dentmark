@@ -90,17 +90,17 @@ class Parser:
         child_order = len(parent_node.children)
 
         if self.is_element:
-            tag_def = self.defs_set.get_def(self.name_accum)
+            tag_def = self.defs_set.get_def(self.name_accum, parent_node)
             if tag_def is None:
                 raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {self.name_accum}')
 
             if not parent_node.is_child_allowed(self.name_accum):
-                raise Exception(f"Child tag '{tag_def.tag_name}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
+                raise Exception(f"Child tag '{self.name_accum}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
 
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
 
-            node = tag_def(prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
+            node = tag_def(self.name_accum, prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
 
             text = None
             if self.pre_text_pending:

@@ -22,7 +22,9 @@ class TagDef:
     # maybe use type or issubclasss instead?
     is_element = True
 
-    def __init__(self, line_no, indent_level, parent, order, nth_of_type, trim_left, trim_right):
+    def __init__(self, tag_name, line_no, indent_level, parent, order, nth_of_type, trim_left, trim_right):
+        # tag_name defined on class, but passed in ctor in case inheriting classes want to do something custom with this
+        # (i.e. dynamically create defs)
         self.trim_left = trim_left
         self.trim_right = trim_right
 
@@ -48,7 +50,7 @@ class TagDef:
     def init_as_root(cls):
         if not cls.is_root:
             raise Exception(f"Cannot init non-root TagDef '{cls.__name__}' as root")
-        return cls(None, None, None, 0, 0, False, False)
+        return cls(cls.tag_name, None, None, None, 0, 0, False, False)
 
 
     @classmethod

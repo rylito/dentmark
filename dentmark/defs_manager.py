@@ -4,12 +4,15 @@ class DefSet:
     def __init__(self, tag_set_name):
         #self.registered_tags = {}
         self.tag_set_name = tag_set_name
-        self.pre_tag_names = []
+        self.pre_tag_addresses = []
         self.root_def = None
         self.tag_dict = {}
         self._is_checked = False
         #self.tag_dict = self._build_tag_dict(defs_cls_list)
         #self._check()
+
+        # {tag_address: {child_tag_name: relation}}
+        self.children_relation_dict = {}
 
 
     #@property
@@ -25,27 +28,35 @@ class DefSet:
         if not use_name:
             raise Exception(f"tag_name not defined for: '{tag_cls.__name__}'")
 
-        if not replace:
-            existing_tag_for_name = self.tag_dict.get(use_name)
-            if existing_tag_for_name is not None:
-                raise Exception(f"Duplicate tag name '{use_name}' defined by '{existing_tag_for_name.__name__}' and '{tag_cls.__name__}'")
+        tag_cls.check(use_name)
 
-        if tag_cls.is_root:
+        for address in tag_cls.addresses:
+            if not replace:
+                existing_tag_for_address = self.tag_dict.get(address)
+                if existing_tag_for_address is not None:
+                    raise Exception(f"Duplicate tag address '{address}' defined by '{existing_tag_for_address.__name__}' and '{tag_cls.__name__}'")
+
+            self.tag_dict[address] = tag_cls
+
+            if tag_cls.is_pre:
+                self.pre_tag_addresses.append(address)
+
+        if tag_cls.is_root():
             if self.root_def and not replace:
-                raise Exception(f"TagDef '{tag_cls.__name__}' has is_root=True but root tag '{self.root_def.__name__}' already found. There can only be one root def.")
+                raise Exception(f"TagDef '{tag_cls.__name__}' has no parents defined and is a root tag, but root tag '{self.root_def.__name__}' already found. There can only be one root def.")
             else:
                 self.root_def = tag_cls
 
-        self.tag_dict[use_name] = tag_cls
+        #self.tag_dict[use_name] = tag_cls
 
-        if tag_cls.is_pre:
-            self.pre_tag_names.append(tag_cls.tag_name)
+        #if tag_cls.is_pre:
+            #self.pre_tag_addresses.append(tag_cls.tag_name)
 
         self._is_checked = False
 
 
-    def remove_tag(self, tag_name):
-        del self.tag_dict[tag_name]
+    def remove_tag(self, tag_address):
+        del self.tag_dict[tag_address]
 
 
     # decorator for convenience
@@ -91,15 +102,48 @@ class DefSet:
         if not self.tag_dict:
             raise Exception(f"Tag set '{self.tag_set_name}' contains no TagDefs")
 
-        for tag_def in self.tag_dict.values():
-            tag_def.check(self.tag_dict)
+        #unique_addresses = set()
+        children_relation_dict = {}
+
+        for address, tag_def_cls in self.tag_dict.items():
+            #tag_def.check(self.tag_dict)
+            parts = address.split('.')
+            for i in range(len(parts)):
+                partial = '.'.join(parts[:i + 1])
+                #unique_addresses.add(partial)
+                if partial not in self.tag_dict:
+                    raise Exception(f"TagDef parent relation error for '{tag_def_cls.__name__}': TagDef with address '{partial}' not registered")
+
+            # make sure pre tags don't have children and build children_relation_dict
+            for relation in tag_def_cls.parents:
+                #print('CHECK THIS', relation.parent_tag_address, self.pre_tag_addresses)
+                if relation.parent_tag_address in self.pre_tag_addresses:
+                    pre_tag_def_cls = self.tag_dict[relation.parent_tag_address]
+                    raise Exception(f"TagDef parent relation error for '{tag_def_cls.__name__}': '{relation.parent_tag_address}' refers to TagDef '{pre_tag_def_cls.__name__}' which has is_pre=True. Preformatted tags cannot have child elements")
+
+                # resolve this way rather than using tag_def_cls.tag_name since tag name might be registered dynamically
+                child_tag_name = parts[-1]
+
+                children_relation_dict.setdefault(relation.parent_tag_address, {})[child_tag_name] = relation
+
+            #if tag_def_cls.is_pre:
+                #self.pre_tag_addresses.append()
+
+        self.children_relation_dict = children_relation_dict
+
+        #print(unique_addresses)
+        #input('HOLD')
 
         self._is_checked = True
 
+    def is_pre(self, tag_address):
+        return tag_address in self.pre_tag_addresses
 
-    def get_def(self, tag_name, parent_node): # parent node not used here, but useful if this class is extended
-        #assert self._is_checked, 'tags have not been checked. Danger everywhere.' #TODO DELME
-        return self.tag_dict.get(tag_name)
+    def get_def(self, tag_address):
+        return self.tag_dict.get(tag_address)
+
+    def get_children_relations(self, tag_address):
+        return self.children_relation_dict.get(tag_address, {})
 
 
 class DefsManager:
@@ -146,7 +190,9 @@ class DefsManager:
 
         new_tag_set = DefSet(new_tag_set_name)
 
-        for tag_name, tag_def_cls in from_tag_set.tag_dict.items():
+        #for tag_address, tag_def_cls in from_tag_set.tag_dict.items():
+        for tag_def_cls in set(from_tag_set.tag_dict.values()):
+            #print('COPYING', tag_def_cls)
             new_tag_set.register_tag(tag_def_cls)
 
         #new_tag_set = DefSet(new_tag_set_name)

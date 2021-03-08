@@ -1,4 +1,4 @@
-from dentmark.tag_def import TagDef
+from dentmark.tag_def import TagDef, Optional, OptionalUnique, Required, RequiredUnique
 
 from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
@@ -8,15 +8,15 @@ def_tag_set = defs_manager.get_tag_set()
 @def_tag_set.register()
 class Image(TagDef):
     tag_name = 'img'
-    # NOTE title already defined in anchor.TitleContext.
-    # We can just re-use this context tag here since it has
-    # the same configuration
-    allow_children = ['title', 'alt']
 
-    unique_children = ['title', 'alt']
+    #allow_children = ['title', 'alt']
 
-    min_num_children = 1
-    max_num_children = 1
+    #unique_children = ['title', 'alt']
+
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
+
+    parents = [Optional('root')]
 
     def render_main(self):
         # use first child as src
@@ -32,11 +32,17 @@ class Image(TagDef):
 
 
 @def_tag_set.register()
-class AltContext(TagDef):
+class ImgAltContext(TagDef):
     tag_name = 'alt'
     is_context = True
-    allow_children = []
+    #allow_children = []
 
-    min_num_children = 1
-    max_num_children = 1
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
+
+    parents = [OptionalUnique('root.img')]
+
+@def_tag_set.register()
+class ImgTitleContext(ImgAltContext):
+    tag_name = 'title'
 

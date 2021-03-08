@@ -64,7 +64,8 @@ class Parser:
 
     def _rollup(self):
         popped = self.stack.pop()
-        popped.check_children()
+        children_relations = self.defs_set.get_children_relations(popped.address)
+        popped.check_children(children_relations)
         tail = self.stack[-1]
         tail.children.append(popped)
         return popped
@@ -90,17 +91,24 @@ class Parser:
         child_order = len(parent_node.children)
 
         if self.is_element:
-            tag_def = self.defs_set.get_def(self.name_accum, parent_node)
+            #tag_address = self._get_address()
+            tag_address = f'{parent_node.address}.{self.name_accum}'
+            #tag_def = self.defs_set.get_def(self.name_accum, parent_node)
+            tag_def = self.defs_set.get_def(tag_address)
+            print(self.stack)
+            print(tag_address, tag_def)
+            #input('HOLD')
             if tag_def is None:
-                raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {self.name_accum}')
+                raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {tag_address}')
 
-            if not parent_node.is_child_allowed(self.name_accum):
-                raise Exception(f"Child tag '{self.name_accum}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
+            #if not parent_node.is_child_allowed(self.name_accum):
+                #raise Exception(f"Child tag '{self.name_accum}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
 
+            #TODO do we want to base the counts on the name_accum or the address? for now, just go off name_accum
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
 
-            node = tag_def(self.name_accum, prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
+            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
 
             text = None
             if self.pre_text_pending:
@@ -144,7 +152,7 @@ class Parser:
             self._rollup()
 
 
-    def _check_name(self, c, is_start_of_line):
+    def _check_name(self, c, is_start_of_line, indent_level):
         if c == ELEMENT_DELIM:
             # validate name
             self.track_name = False
@@ -169,7 +177,25 @@ class Parser:
                 if self.name_accum[-1] == TRIM:
                     self.name_accum = self.name_accum[:-1]
 
-                if self.name_accum in self.defs_set.pre_tag_names:
+
+                print(self.name_accum)
+                print('MY STACK IS',self.stack)
+                parent = self.stack[-1]
+                if parent.indent_level == indent_level:
+                    parent = self.stack[-2] # Fixes bug where this incorrectly nests element and gives wrong address prior to _rollup being called
+                address = f'{parent.address}.{self.name_accum}'
+                print('PREV PROC', self.prev_processed, self.prev_processed.indent_level if self.prev_processed else None)
+                print('INDENT_LEVEL', indent_level)
+                print('ADDRESS', address)
+                #input('HOLD')
+                #print('.'.join([x.tag_name for x in self.stack]))
+                #print(self._get_address())
+                #print(self.defs_set.is_pre(self._get_address()))
+                #input('HOLD')
+
+                #if self._get_address() in self.defs_set.pre_tag_names:
+
+                if self.defs_set.is_pre(address):
                     self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
@@ -279,7 +305,7 @@ class Parser:
             self.line_accum += c
 
             if self.track_name:
-                self._check_name(c, is_start_of_line)
+                self._check_name(c, is_start_of_line, indent_level)
                 if self.pre_mode:
                     pre_mode_indent = indent_level
             elif self.is_element:
@@ -294,6 +320,7 @@ class Parser:
                 self.pre_text_pending = True
             self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
 
-        self.stack[0].check_children() # check the root node to make sure its children are valid
+        children_relations = self.defs_set.get_children_relations(self.stack[0].address)
+        self.stack[0].check_children(children_relations) # check the root node to make sure its children are valid
 
         return self.stack[0]

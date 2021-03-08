@@ -1,4 +1,4 @@
-from dentmark.tag_def import TagDef
+from dentmark.tag_def import TagDef, Optional, OptionalUnique, Required, RequiredUnique
 
 from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
@@ -7,7 +7,9 @@ def_tag_set = defs_manager.get_tag_set()
 @def_tag_set.register()
 class Annotation(TagDef):
     tag_name = 'a8n'
-    allow_children = ['fn']
+    #allow_children = ['fn']
+
+    parents = [Optional('root.p')] #TODO maybe this can bee root level as well? Maybe blockquote too?
 
     def render_main(self):
         nth_of_type = self.nth_of_type + 1
@@ -20,7 +22,9 @@ class Annotation(TagDef):
 class FootNote(TagDef):
     tag_name = 'fn'
     add_to_collector = True
-    allow_children = ['a', 'i']
+    #allow_children = ['a', 'i']
+
+    parents = [Optional('root.p.a8n')]
 
     def render_main(self):
         return '' # don't render anything in-place

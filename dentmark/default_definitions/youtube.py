@@ -1,4 +1,4 @@
-from dentmark.tag_def import TagDef
+from dentmark.tag_def import TagDef, Optional, OptionalUnique, Required, RequiredUnique
 
 from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
@@ -8,12 +8,14 @@ def_tag_set = defs_manager.get_tag_set()
 @def_tag_set.register()
 class YouTubeEmbed(TagDef):
     tag_name = 'youtube'
-    allow_children = ['width', 'height']
+    #allow_children = ['width', 'height']
 
-    unique_children = ['width', 'height']
+    #unique_children = ['width', 'height']
 
     min_num_children = 1
     max_num_children = 1
+
+    parents = [Optional('root')]
 
     def render_main(self):
         video_id = self.content
@@ -30,11 +32,12 @@ class YouTubeEmbed(TagDef):
 class WidthContext(TagDef):
     tag_name = 'width'
     is_context = True
-    allow_children = []
+    #allow_children = []
 
-    min_num_children = 1
-    max_num_children = 1
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
 
+    parents = [OptionalUnique('root.youtube')]
 
     def validate(self):
         val = self.get_data()

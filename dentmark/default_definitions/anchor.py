@@ -1,4 +1,4 @@
-from dentmark.tag_def import TagDef
+from dentmark.tag_def import TagDef, Optional, OptionalUnique, Required, RequiredUnique
 
 from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
@@ -9,12 +9,14 @@ def_tag_set = defs_manager.get_tag_set()
 class Anchor(TagDef):
     tag_name = 'a'
 
-    allow_children = ['url', 'title']
+    #allow_children = ['url', 'title']
 
-    unique_children = ['url', 'title']
+    #unique_children = ['url', 'title']
 
-    min_num_children = 1
-    max_num_children = 1
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
+
+    parents = [Optional('root'), Optional('root.p'), Optional('root.p.a8n.fn')]
 
 
     def render_main(self):
@@ -34,12 +36,17 @@ class Anchor(TagDef):
 class URLContext(TagDef):
     tag_name = 'url'
     is_context = True
-    allow_children = []
+    #allow_children = []
 
-    min_num_children = 1
-    max_num_children = 1
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
+
+    parents = [OptionalUnique('root.a'), OptionalUnique('root.p.a'), Optional('root.p.a8n.fn.a')]
+
 
 @def_tag_set.register()
-class TitleContext(URLContext):
+class AnchorTitleContext(URLContext):
     tag_name = 'title'
+
+    parents = [OptionalUnique('root.a'), OptionalUnique('root.p.a')]
 

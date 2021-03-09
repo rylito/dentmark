@@ -308,13 +308,13 @@ class TagDef:
 
 
     def pre_render(self, root, extra_context={}):
+        self.extra_context = extra_context
+
         for child in self.children:
             child.pre_render(root, extra_context)
 
         if self.is_context:
             self.parent.context.update({self.tag_name: self.get_data()})
-
-        self.extra_context = extra_context
 
         if self.add_to_collector:
             root.collectors.setdefault(self.tag_name, []).append(self.render(False))

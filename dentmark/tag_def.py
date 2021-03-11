@@ -307,6 +307,19 @@ class TagDef:
             raise Exception(f'{validate}: line {self.line_no}')
 
 
+    # Can be overridden to customize or perform additional validation on the root after parsing
+    # and before render. Called when .render() method is called
+    # If it returns a non-empty string, an exception will be raised
+    def final_root_check(self):
+        pass
+
+
+    #def final_check():
+        #validate = self.validate()
+        #if validate:
+            #raise Exception(f'{validate}: line {self.line_no}')
+
+
     def pre_render(self, root, extra_context={}):
         self.extra_context = extra_context
 
@@ -321,6 +334,13 @@ class TagDef:
 
 
     def render(self, main=True):
+        if self.is_root():
+            root_check = self.final_root_check()
+            if root_check:
+                raise Exception(f'Final root check failed: {root_check}')
+
+
+
         rendered_children = []
         prev_child = None
 

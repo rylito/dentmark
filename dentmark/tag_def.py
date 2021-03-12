@@ -98,6 +98,9 @@ class TagDef:
 
         self.tag_id = f'{self.tag_name}-{self.nth_of_type}'
 
+        # can be used to modify HTML classes without having to override which is a common operation
+        self.classes = []
+
     @classmethod
     def is_root(cls):
         return not cls.parents
@@ -168,7 +171,6 @@ class TagDef:
 
         # check allow_children / exclude_children
 
-        #TODO FIXME re-implement this is_pre check. is_pre should have no children
 
         #if cls.is_pre:
             ##if allow_val or (exclude_val is False) or (exclude_val and exclude_val_type is not bool):
@@ -307,10 +309,11 @@ class TagDef:
             raise Exception(f'{validate}: line {self.line_no}')
 
 
-    # Can be overridden to customize or perform additional validation on the root after parsing
+    # Can be overridden to customize or perform additional validation on the element after parsing
     # and before render. Called when .render() method is called
-    # If it returns a non-empty string, an exception will be raised
-    def final_root_check(self):
+    # If it returns a non-empty string, an exception will be raised.
+    # Useful to modify children elements before rendering self.content
+    def before_render(self):
         pass
 
 
@@ -333,11 +336,24 @@ class TagDef:
             root.collectors.setdefault(self.tag_name, []).append(self.render(False))
 
 
+    # returns a string composed of just the textnodes of non-context children elements
+    def strip_tags(self):
+        stripped = []
+        for child in self.children:
+            if child.is_element:
+                if child.is_context:
+                    continue
+                stripped.extend(child.strip_tags())
+            else:
+                stripped.append(child)
+        return stripped
+
+
     def render(self, main=True):
-        if self.is_root():
-            root_check = self.final_root_check()
-            if root_check:
-                raise Exception(f'Final root check failed: {root_check}')
+        #if self.is_root():
+        before_render = self.before_render()
+        if before_render:
+            raise Exception(f'before_render failed for tag {self.tag_name}: {before_render_checks}')
 
 
 
@@ -425,6 +441,10 @@ class TagDef:
                 return child
             multiple.append(child)
         return multiple if return_multiple else None
+
+    # can be used to modify HTML classes without having to override which is a common operation
+    def add_class(self, html_class_name):
+        self.classes.append(html_class_name)
 
 
     # experiment with generating dentmark markup from the tree,

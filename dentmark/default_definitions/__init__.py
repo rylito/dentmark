@@ -47,7 +47,11 @@ class Paragraph(TagDef):
     parents = [Optional('root')]
 
     def render_main(self):
-        return f'<p>{self.content}</p>'
+        classes = ''
+        if self.classes:
+            class_str = ' '.join(self.classes)
+            classes = f' class="{class_str}"'
+        return f'<p{classes}>{self.content}</p>'
 
 @def_tag_set.register()
 class BlockQuote(TagDef):

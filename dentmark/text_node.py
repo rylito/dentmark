@@ -67,6 +67,19 @@ class TextNode:
 
         return escaped
 
+    # used to 'decorate' this textnode by wrapping it with another.
+    # Mostly used to wrap orphaned text nodes in <p></p>
+    def promote(self, TagDefCls):
+#def __init__(self, tag_name, address, line_no, indent_level, parent, order, nth_of_type, trim_left, trim_right):
+        address = f'{self.parent.address}.{TagDefCls.tag_name}'
+
+        #TODO what to do about nth_of_type here? For now, just use None
+        elem = TagDefCls(TagDefCls.tag_name, address, self.line_no, self.indent_level, self.parent, self.order, None, False, False)
+
+        self.parent = elem
+        elem.children.append(self)
+        return elem
+
 
     def to_dentmark(self, indent_level):
         # don't print empty escaped lines i.e

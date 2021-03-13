@@ -25,7 +25,7 @@ class Root(TagDef):
         fns_rendered = ''.join(fns)
 
         if fns_rendered:
-            body += f'<section class="footnotes" role="doc-endnotes"><ol>{fns_rendered}</ol></section>'
+            body += f'<section class="footnotes" role="doc-endnotes"><hr/><ol>{fns_rendered}</ol></section>'
 
         return body
 

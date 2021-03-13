@@ -89,6 +89,7 @@ class Parser:
 
         parent_node = self.stack[-1]
         child_order = len(parent_node.children)
+        root = self.stack[0]
 
         if self.is_element:
             #tag_address = self._get_address()
@@ -108,7 +109,7 @@ class Parser:
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
 
-            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, child_order, prev_count, self.trim_left, self.trim_right)
+            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, root, child_order, prev_count, self.trim_left, self.trim_right)
 
             text = None
             if self.pre_text_pending:
@@ -119,7 +120,7 @@ class Parser:
                 if first_element != '':
                     text = first_element
             if text is not None:
-                node.children.append(TextNode(prev_line_no, prev_indent_level, node, 0, text))
+                node.children.append(TextNode(prev_line_no, prev_indent_level, node, root, 0, text))
 
 
             self.stack.append(node)
@@ -133,7 +134,7 @@ class Parser:
             #      ^ strip this
             text = self.line_accum.strip()
 
-            node = TextNode(prev_line_no, prev_indent_level, parent_node, child_order, text, self.escaped)
+            node = TextNode(prev_line_no, prev_indent_level, parent_node, root, child_order, text, self.escaped)
             parent_node.children.append(node)
 
         self.prev_processed = node

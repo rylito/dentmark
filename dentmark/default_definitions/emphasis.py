@@ -8,7 +8,7 @@ def_tag_set = defs_manager.get_tag_set()
 class Emphasis(TagDef):
     #allow_children = ['a', 'b', 's', 'i']
 
-    parents = [Optional('root'), Optional('root.p')] #TODO maybe in a as well?
+    parents = [Optional('root'), Optional('root.p'), Optional('root.a')]
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'

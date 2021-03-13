@@ -13,8 +13,8 @@ class Anchor(TagDef):
 
     #unique_children = ['url', 'title']
 
-    min_num_text_nodes = 1
-    max_num_text_nodes = 1
+    #min_num_text_nodes = 1
+    #max_num_text_nodes = 1
 
     parents = [Optional('root'), Optional('root.p'), Optional('root.p.a8n.fn')]
 

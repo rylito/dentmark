@@ -62,7 +62,7 @@ def parse(file_name_or_str, tag_set_name=None):
 
 def render(file_name_or_str, tag_set_name=None, extra_context={}):
     root = parse(file_name_or_str, tag_set_name)
-    root.pre_render(root, extra_context)
+    root.pre_render(extra_context)
     rendered = root.render()
     return rendered
 

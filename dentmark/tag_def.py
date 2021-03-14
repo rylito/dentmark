@@ -173,7 +173,6 @@ class TagDef:
 
         print(cls.addresses)
 
-
         # check allow_children / exclude_children
 
 
@@ -409,7 +408,8 @@ class TagDef:
 
         from dentmark.text_node import TextNode
 
-        text_node_inst = TextNode(None, None, tag_def_inst, self.root, 0, value)
+        # TODO this might need to be re-worked when we go back and re-factor yucca
+        text_node_inst = TextNode(None, None, tag_def_inst, self.root, 0, value, False, self.extra_context)
         tag_def_inst.children.append(text_node_inst)
         self.children.append(tag_def_inst)
 
@@ -503,3 +503,5 @@ class TagDef:
             return f'{children_str}'
         else:
             return f'{tab}{trim_left}{self.tag_name}{trim_right}:{children_str}'
+
+

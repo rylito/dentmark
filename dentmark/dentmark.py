@@ -48,7 +48,7 @@ defs_manager = DefsManager()
         #}
 
 
-def parse(file_name_or_str, tag_set_name=None, extra_context = {}):
+def parse(file_name_or_str, tag_set_name=None, extra_context = {}, only_address=None):
     #if tag_set_name is None or tag_set_name == DEFAULT_DEF_SET:
         #if def_tag_set.empty:
             # load the default tags
@@ -57,12 +57,12 @@ def parse(file_name_or_str, tag_set_name=None, extra_context = {}):
     use_tag_set = defs_manager.get_tag_set(tag_set_name)
 
     p = Parser(use_tag_set, file_name_or_str, extra_context)
-    return p.parse()
+    return p.parse(only_address)
 
 
 def render(file_name_or_str, tag_set_name=None, extra_context={}):
-    root = parse(file_name_or_str, tag_set_name)
-    root.pre_render(extra_context)
+    root = parse(file_name_or_str, tag_set_name, extra_context)
+    root.pre_render()
     rendered = root.render()
     return rendered
 

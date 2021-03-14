@@ -8,7 +8,7 @@ class TextNode:
     trim_left = False
     trim_right = False
 
-    def __init__(self, line_no, indent_level, parent, root, order, text, escaped=False):
+    def __init__(self, line_no, indent_level, parent, root, order, text, escaped=False, extra_context={}):
         self.line_no = line_no
         self.indent_level = indent_level
         self.parent = parent
@@ -16,6 +16,7 @@ class TextNode:
         self.order = order
         self.text = str(text) # make sure this is always a str to avoid errors when inserting/adding
         self.escaped = escaped # whether this text was prefixed with ':' to not have it considered a tag
+        self.extra_context = extra_context
 
     def walk(self):
         return self.text
@@ -75,7 +76,7 @@ class TextNode:
         address = f'{self.parent.address}.{TagDefCls.tag_name}'
 
         #TODO what to do about nth_of_type here? For now, just use None
-        elem = TagDefCls(TagDefCls.tag_name, address, self.line_no, self.indent_level, self.parent, self.root, self.order, None, False, False)
+        elem = TagDefCls(TagDefCls.tag_name, address, self.line_no, self.indent_level, self.parent, self.root, self.order, None, False, False, self.extra_context)
 
         self.parent = elem
         elem.children.append(self)

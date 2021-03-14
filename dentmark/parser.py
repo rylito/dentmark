@@ -66,7 +66,10 @@ class Parser:
     def _rollup(self):
         popped = self.stack.pop()
         children_relations = self.defs_set.get_children_relations(popped.address)
+        print('checking for tag', popped.address)
+        print('prev_processed', self.prev_processed)
         popped.check_children(children_relations)
+        #if self.stack: # if only_address is used, there might not be anything else left on stack
         tail = self.stack[-1]
         tail.children.append(popped)
         return popped
@@ -77,6 +80,14 @@ class Parser:
 
 
     def _append_stack(self, prev_indent_level, indent_level, prev_line_no, line_no):
+
+        parent_node = self.stack[-1]
+        tag_address = f'{parent_node.address}.{self.name_accum}'
+        if self.only_address and not tag_address.startswith(self.only_address):
+            print('rejecting this tag', self.only_address, tag_address)
+            return
+
+
         if indent_level < self.lowest_indent:
             self._indentation_error(line_no)
 
@@ -95,6 +106,10 @@ class Parser:
         if self.is_element:
             #tag_address = self._get_address()
             tag_address = f'{parent_node.address}.{self.name_accum}'
+            #if self.only_address and not tag_address.startswith(self.only_address):
+                #print('rejecting this tag', self.only_address, tag_address)
+                #return
+
             #tag_def = self.defs_set.get_def(self.name_accum, parent_node)
             tag_def = self.defs_set.get_def(tag_address)
             print(self.stack)
@@ -121,7 +136,7 @@ class Parser:
                 if first_element != '':
                     text = first_element
             if text is not None:
-                node.children.append(TextNode(prev_line_no, prev_indent_level, node, root, 0, text))
+                node.children.append(TextNode(prev_line_no, prev_indent_level, node, root, 0, text, False, self.extra_context))
 
 
             self.stack.append(node)
@@ -135,7 +150,7 @@ class Parser:
             #      ^ strip this
             text = self.line_accum.strip()
 
-            node = TextNode(prev_line_no, prev_indent_level, parent_node, root, child_order, text, self.escaped)
+            node = TextNode(prev_line_no, prev_indent_level, parent_node, root, child_order, text, self.escaped, self.extra_context)
             parent_node.children.append(node)
 
         self.prev_processed = node
@@ -248,8 +263,12 @@ class Parser:
         return pre_text
 
 
-    def parse(self):
+    # only_address limits the parsing to only that address and any subchildren.
+    # Used for partial rendering (i.e. extracting metadata without rendering entire document)
+    def parse(self, only_address=None):
         # make sure def set is checked
+        self.only_address = only_address
+
         self.defs_set.check()
 
         self.counts = {}

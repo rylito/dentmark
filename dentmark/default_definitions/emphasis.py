@@ -8,7 +8,7 @@ def_tag_set = defs_manager.get_tag_set()
 class Emphasis(TagDef):
     #allow_children = ['a', 'b', 's', 'i']
 
-    parents = [Optional('root'), Optional('root.p'), Optional('root.a')]
+    parents = [Optional('root'), Optional('root.p'), Optional('root.a'), Optional('root.bq')]
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'
@@ -27,4 +27,14 @@ class Bold(Emphasis):
 class StrikeThrough(Emphasis):
     tag_name = 's'
 
+@def_tag_set.register()
+class HighLight(TagDef):
+    tag_name = 'hl'
+
+    parents = [Optional('root'), Optional('root.p'), Optional('root.bq'), Optional('root.bq.p')]
+
+    def render_main(self):
+        nth_of_type = self.nth_of_type + 1
+        span_id = f'hlref:{nth_of_type}'
+        return f'<span class="highlight" id="{span_id}">{self.content}</span>'
 

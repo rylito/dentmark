@@ -9,7 +9,7 @@ class Annotation(TagDef):
     tag_name = 'a8n'
     #allow_children = ['fn']
 
-    parents = [Optional('root.p')] #TODO maybe this can bee root level as well? Maybe blockquote too?
+    parents = [Optional('root.p'), Optional('root.bq')] #TODO maybe this can be root level as well? Maybe blockquote too?
 
     def render_main(self):
         nth_of_type = self.nth_of_type + 1
@@ -24,7 +24,7 @@ class FootNote(TagDef):
     add_to_collector = True
     #allow_children = ['a', 'i']
 
-    parents = [Optional('root.p.a8n')]
+    parents = [Optional('root.p.a8n'), Optional('root.bq.a8n')]
 
     def render_main(self):
         return '' # don't render anything in-place

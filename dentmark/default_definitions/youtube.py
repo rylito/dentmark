@@ -41,8 +41,8 @@ class WidthContext(TagDef):
 
     def validate(self):
         val = self.get_data()
-        if not val.isdigit():
-            return f"Tag '{self.tag_name}' expects a positive integer"
+        if not val.isdigit() or int(val) < 1:
+            return f"Tag '{self.tag_name}' expects a positive integer >= 1"
 
 
 @def_tag_set.register()

@@ -44,7 +44,7 @@ class Paragraph(TagDef):
     tag_name = 'p'
     #exclude_children = ['p', 'li', 'bq']
 
-    parents = [Optional('root')]
+    parents = [Optional('root'), Optional('root.bq')]
 
     def render_main(self):
         classes = ''
@@ -58,7 +58,7 @@ class BlockQuote(TagDef):
     tag_name = 'bq'
     #allow_children = ['p', 'b', 's', 'i'] # TODO probably some others too
 
-    parents = [Optional('root')]
+    parents = [Optional('root'), Optional('root.p.a8n.fn')]
 
     def render_main(self):
         return f'<blockquote>{self.content}</blockquote>'
@@ -79,7 +79,7 @@ class Break(TagDef):
     tag_name = 'br'
     #allow_children = []
 
-    parents = [Optional('root'), Optional('root.p')]
+    parents = [Optional('root'), Optional('root.p'), Optional('root.bq.p'), Optional('root.bq')]
 
     #TODO maybe enforce that this can't have any text/children?
     def render_main(self):

@@ -14,9 +14,10 @@ VALID_NAME_CHARS = 'abcdefghijklmnopqrstuvwxyz01234567890_-'
 
 
 class Parser:
-    def __init__(self, defs_set, flo_or_str):
+    def __init__(self, defs_set, flo_or_str, extra_context):
         self.defs_set = defs_set
         self.stream = io.StringIO(flo_or_str) if type(flo_or_str) is str else flo_or_str
+        self.extra_context = extra_context
 
 
     def _each_char(self):
@@ -109,7 +110,7 @@ class Parser:
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
 
-            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, root, child_order, prev_count, self.trim_left, self.trim_right)
+            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, root, child_order, prev_count, self.trim_left, self.trim_right, self.extra_context)
 
             text = None
             if self.pre_text_pending:
@@ -253,7 +254,7 @@ class Parser:
 
         self.counts = {}
 
-        self.stack = [self.defs_set.root_def.init_as_root()]
+        self.stack = [self.defs_set.root_def.init_as_root(self.extra_context)]
         self.prev_processed = None
         self.lowest_indent = None
 

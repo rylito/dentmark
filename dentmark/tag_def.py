@@ -73,7 +73,7 @@ class TagDef:
     # maybe use type or issubclasss instead?
     is_element = True
 
-    def __init__(self, tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right):
+    def __init__(self, tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right, extra_context):
         print(tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right)
         #input('HOLD')
         # tag_name defined on class, but passed in ctor in case inheriting classes want to do something custom with this
@@ -97,7 +97,7 @@ class TagDef:
         self.collectors = {}
         self.content = ''
         self.context = {}
-        self.extra_context = {}
+        self.extra_context = extra_context
 
         self.tag_id = f'{self.tag_name}-{self.nth_of_type}'
 
@@ -113,10 +113,10 @@ class TagDef:
         #for
 
     @classmethod
-    def init_as_root(cls):
+    def init_as_root(cls, extra_context):
         if not cls.is_root():
             raise Exception(f"Cannot init non-root TagDef '{cls.__name__}' as root")
-        root_elem = cls(cls.tag_name, cls.tag_name, None, None, None, None, 0, 0, False, False)
+        root_elem = cls(cls.tag_name, cls.tag_name, None, None, None, None, 0, 0, False, False, extra_context)
         root_elem.root = root_elem
         return root_elem
 
@@ -328,11 +328,12 @@ class TagDef:
             #raise Exception(f'{validate}: line {self.line_no}')
 
 
-    def pre_render(self, extra_context={}):
-        self.extra_context = extra_context
+    #def pre_render(self, extra_context={}):
+    def pre_render(self):
+        #self.extra_context = extra_context
 
         for child in self.children:
-            child.pre_render(extra_context)
+            child.pre_render()
 
         if self.is_context:
             self.parent.context.update({self.tag_name: self.get_data()})
@@ -404,7 +405,7 @@ class TagDef:
         # TODO just use None for values that can't be calculated. A bit hackish, but will
         # be fine to just re-generate the dentmark code. Not going to render this tree
         tag_address = f'{self.parent.address}.{tag_def.tag_name}'
-        tag_def_inst = tag_def(tag_def.tag_name, tag_address, None, None, self, self.root, len(self.children), None, False, False)
+        tag_def_inst = tag_def(tag_def.tag_name, tag_address, None, None, self, self.root, len(self.children), None, False, False, self.extra_context)
 
         from dentmark.text_node import TextNode
 
@@ -451,6 +452,28 @@ class TagDef:
     # can be used to modify HTML classes without having to override which is a common operation
     def add_class(self, html_class_name):
         self.classes.append(html_class_name)
+
+
+    def _sibling_helper(self, get_next):
+        prev = None
+        return_next = False
+        for child in self.parent.children:
+            if return_next:
+                return child
+            if child is self:
+                if get_next:
+                    return_next = True
+                else:
+                    return prev
+            prev = child
+        return None
+
+
+    def next_sibling(self):
+        return self._sibling_helper(True)
+
+    def prev_sibling(self):
+        return self._sibling_helper(False)
 
 
     # experiment with generating dentmark markup from the tree,

@@ -16,7 +16,7 @@ class Anchor(TagDef):
     #min_num_text_nodes = 1
     #max_num_text_nodes = 1
 
-    parents = [Optional('root'), Optional('root.p'), Optional('root.p.a8n.fn')]
+    parents = [Optional('root'), Optional('root.p'), Optional('root.p.a8n.fn'), Optional('root.bq.a8n.fn')]
 
 
     def render_main(self):
@@ -41,8 +41,7 @@ class URLContext(TagDef):
     min_num_text_nodes = 1
     max_num_text_nodes = 1
 
-    parents = [OptionalUnique('root.a'), OptionalUnique('root.p.a'), Optional('root.p.a8n.fn.a')]
-
+    parents = [OptionalUnique('root.a'), OptionalUnique('root.p.a'), Optional('root.p.a8n.fn.a'), Optional('root.bq.a8n.fn.a')]
 
 @def_tag_set.register()
 class AnchorTitleContext(URLContext):

@@ -475,6 +475,26 @@ class TagDef:
     def prev_sibling(self):
         return self._sibling_helper(False)
 
+    # if tag_name arg is 'p' and self is 'h3'
+    # h3 (self), img, p(1), p(2) -> p(1)
+    # h3 (self), img, h3 -> None
+    def next_tag_of_type(self, tag_name):
+        start_search = False
+        for child in self.parent.children:
+            if child is self:
+                start_search = True
+                #input('start_search')
+                continue
+
+            if child.is_element and start_search:
+                if child.tag_name == tag_name:
+                    return child
+                elif child.tag_name == self.tag_name:
+                    #input('dupe hit')
+                    return None
+        input('nada')
+        return None
+
 
     # experiment with generating dentmark markup from the tree,
     # so that eventually we can edit the tree, then output modified dentmark

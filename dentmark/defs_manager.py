@@ -21,7 +21,7 @@ class DefSet:
 
     # tag_name arg allows us to create tags dynamically (i.e. tags assigned named at parse time, so multiple tag names can use same cls)
     def register_tag(self, tag_cls, replace=False, tag_name=None):
-        print('registering', tag_cls)
+        #print('registering', tag_cls)
 
         use_name = tag_cls.tag_name if tag_cls.tag_name is not None else tag_name
 
@@ -152,7 +152,7 @@ class DefsManager:
         #self._default_loaded = False
 
     def get_tag_set(self, tag_set_name=None):
-        print('get_tag_set_hit')
+        #print('get_tag_set_hit')
         if tag_set_name is None:
             tag_set_name = DEFAULT_DEF_SET
 

@@ -74,7 +74,7 @@ class TagDef:
     is_element = True
 
     def __init__(self, tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right, extra_context):
-        print(tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right)
+        #print(tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right)
         #input('HOLD')
         # tag_name defined on class, but passed in ctor in case inheriting classes want to do something custom with this
         # (i.e. dynamically create defs)
@@ -171,7 +171,7 @@ class TagDef:
             declared_parent_tag_addresses.add(relation.parent_tag_address)
             cls.addresses.append(f'{relation.parent_tag_address}.{tag_name}')
 
-        print(cls.addresses)
+        #print(cls.addresses)
 
         # check allow_children / exclude_children
 

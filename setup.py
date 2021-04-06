@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="dentmark",
-    version="0.0.7",
+    version="0.0.8",
     author="Ryli Dunlap",
     author_email="ryli@transvec.com",
     description="An indentation-delimited, configurable markdown language",

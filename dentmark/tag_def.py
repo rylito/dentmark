@@ -390,16 +390,24 @@ class TagDef:
         # TODO is this a sane default?
         return self.render_main()
 
-    def add_child_element(self, defs_manager, tag_name, value):
 
-        tag_def = defs_manager.get_def(tag_name)
+    def add_child_element(self, tag_address, value, tag_set_name=None):
+
+        #tag_def = defs_manager.get_def(tag_name)
+        from dentmark.dentmark import defs_manager
+
+        tag_set = defs_manager.get_tag_set(tag_set_name)
+        tag_def = tag_set.get_def(tag_address)
+
         if tag_def is None:
-            raise Exception(f"Not a defined tag_name: {tag_name}")
+            raise Exception(f"Not a defined tag address: {tag_address}")
 
-        if tag_name not in self.allow_children:
-            def_ref = f"TagDef '{self.__class__.__name__}'"
+        #children_relations = tag_set.get_children_relations(self.address)
 
-            raise Exception(f"Child tag '{tag_name}' not allowed as child of {def_ref}")
+        #if tag_name not in self.allow_children:
+            #def_ref = f"TagDef '{self.__class__.__name__}'"
+
+            #raise Exception(f"Child tag '{tag_name}' not allowed as child of {def_ref}")
 
         # TODO just use None for values that can't be calculated. A bit hackish, but will
         # be fine to just re-generate the dentmark code. Not going to render this tree
@@ -408,10 +416,15 @@ class TagDef:
 
         from dentmark.text_node import TextNode
 
-        # TODO this might need to be re-worked when we go back and re-factor yucca
         text_node_inst = TextNode(None, None, tag_def_inst, self.root, 0, value, False, self.extra_context)
         tag_def_inst.children.append(text_node_inst)
         self.children.append(tag_def_inst)
+
+        tag_def_inst_relations = tag_set.get_children_relations(tag_def_inst.address)
+        tag_def_inst.check_children(tag_def_inst_relations)
+
+        children_relations = tag_set.get_children_relations(self.address)
+        self.check_children(children_relations)
 
 
     def get_tag_by_id(self, tag_id):

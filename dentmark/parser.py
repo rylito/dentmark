@@ -66,10 +66,7 @@ class Parser:
     def _rollup(self):
         popped = self.stack.pop()
         children_relations = self.defs_set.get_children_relations(popped.address)
-        #print('checking for tag', popped.address)
-        #print('prev_processed', self.prev_processed)
         popped.check_children(children_relations)
-        #if self.stack: # if only_address is used, there might not be anything else left on stack
         tail = self.stack[-1]
         tail.children.append(popped)
         return popped
@@ -84,7 +81,6 @@ class Parser:
         parent_node = self.stack[-1]
         tag_address = f'{parent_node.address}.{self.name_accum}'
         if self.only_address and not tag_address.startswith(self.only_address):
-            #print('rejecting this tag', self.only_address, tag_address)
             return
 
 
@@ -104,22 +100,10 @@ class Parser:
         root = self.stack[0]
 
         if self.is_element:
-            #tag_address = self._get_address()
             tag_address = f'{parent_node.address}.{self.name_accum}'
-            #if self.only_address and not tag_address.startswith(self.only_address):
-                #print('rejecting this tag', self.only_address, tag_address)
-                #return
-
-            #tag_def = self.defs_set.get_def(self.name_accum, parent_node)
             tag_def = self.defs_set.get_def(tag_address)
-            #print(self.stack)
-            #print(tag_address, tag_def)
-            #input('HOLD')
             if tag_def is None:
                 raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {tag_address}')
-
-            #if not parent_node.is_child_allowed(self.name_accum):
-                #raise Exception(f"Child tag '{self.name_accum}' on line {prev_line_no} not allowed for parent tag '{parent_node.tag_name}'")
 
             #TODO do we want to base the counts on the name_accum or the address? for now, just go off name_accum
             prev_count = self.counts.get(self.name_accum, 0)
@@ -195,22 +179,10 @@ class Parser:
                     self.name_accum = self.name_accum[:-1]
 
 
-                #print(self.name_accum)
-                #print('MY STACK IS',self.stack)
                 parent = self.stack[-1]
                 if parent.indent_level == indent_level:
                     parent = self.stack[-2] # Fixes bug where this incorrectly nests element and gives wrong address prior to _rollup being called
                 address = f'{parent.address}.{self.name_accum}'
-                #print('PREV PROC', self.prev_processed, self.prev_processed.indent_level if self.prev_processed else None)
-                #print('INDENT_LEVEL', indent_level)
-                #print('ADDRESS', address)
-                #input('HOLD')
-                #print('.'.join([x.tag_name for x in self.stack]))
-                #print(self._get_address())
-                #print(self.defs_set.is_pre(self._get_address()))
-                #input('HOLD')
-
-                #if self._get_address() in self.defs_set.pre_tag_names:
 
                 if self.defs_set.is_pre(address):
                     self.pre_mode = True

@@ -31,7 +31,6 @@ class TextNode:
     def render(self, main=None): # main arg doesn't do anything here - just so this has same interface as TagDef
         # TODO Do we really need this .strip() here? Leave it for now since I don't think it's hurting anything
         return self.get_enhanced_text().strip() if not self.parent.is_pre else self.text
-        #return self.get_enhanced_text() if not self.parent.is_pre else self.text
 
     def get_enhanced_text(self):
         # Inserts 'fancy' left and right quotes as well as some other typographic enhancements
@@ -72,7 +71,6 @@ class TextNode:
     # used to 'decorate' this textnode by wrapping it with another.
     # Mostly used to wrap orphaned text nodes in <p></p>
     def promote(self, TagDefCls):
-#def __init__(self, tag_name, address, line_no, indent_level, parent, order, nth_of_type, trim_left, trim_right):
         address = f'{self.parent.address}.{TagDefCls.tag_name}'
 
         #TODO what to do about nth_of_type here? For now, just use None

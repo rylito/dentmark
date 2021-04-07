@@ -5,10 +5,7 @@ def_tag_set = defs_manager.get_tag_set()
 
 
 
-#@def_tag_set.register()
 class Headline(TagDef):
-    #allow_children = []
-
     parents = [Optional('root')]
 
     def render_main(self):

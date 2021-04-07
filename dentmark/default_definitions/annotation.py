@@ -7,7 +7,6 @@ def_tag_set = defs_manager.get_tag_set()
 @def_tag_set.register()
 class Annotation(TagDef):
     tag_name = 'a8n'
-    #allow_children = ['fn']
 
     parents = [Optional('root.p'), Optional('root.bq')] #TODO maybe this can be root level as well? Maybe blockquote too?
 
@@ -18,11 +17,11 @@ class Annotation(TagDef):
 
         return f'<span class="annotation__underline">{self.content}</span><sup id="{sup_id}"><a href="{href}" class="footnote-ref" role="doc-noteref">[{nth_of_type}]</a></sup>'
 
+
 @def_tag_set.register()
 class FootNote(TagDef):
     tag_name = 'fn'
     add_to_collector = True
-    #allow_children = ['a', 'i']
 
     parents = [Optional('root.p.a8n'), Optional('root.bq.a8n')]
 

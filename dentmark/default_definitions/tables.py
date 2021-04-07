@@ -4,11 +4,9 @@ from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
 
 
-
 @def_tag_set.register()
 class Table(TagDef):
     tag_name = 'table'
-    #allow_children = ['tr']
 
     min_num_text_nodes = 0
     max_num_text_nodes = 0
@@ -22,18 +20,12 @@ class Table(TagDef):
 @def_tag_set.register()
 class TableRow(TagDef):
     tag_name = 'tr'
-    #allow_children = ['td']
 
     min_num_text_nodes = 0
     max_num_text_nodes = 0
 
     parents = [Required('root.table')]
 
-
-    #def validate(self):
-        #for child in self.children:
-            #if not child.is_element:
-                #return 'tr tag does not allow text nodes. Only td tags are allowed as children'
 
     def render_main(self):
         return f'<tr>{self.content}</tr>'
@@ -42,11 +34,6 @@ class TableRow(TagDef):
 @def_tag_set.register()
 class TableCell(TagDef):
     tag_name = 'td'
-
-    #TODO probably should allow links and some other tags too
-    #allow_children = ['colspan', 'rowspan', 'align', 'a', 'b', 's', 'i']
-
-    #unique_children = ['colspan', 'rowspan', 'align']
 
     parents = [Required('root.table.tr')]
 
@@ -70,7 +57,6 @@ class TableCell(TagDef):
 class ColspanContext(TagDef):
     tag_name = 'colspan'
     is_context = True
-    #allow_children = []
 
     min_num_text_nodes = 1
     max_num_text_nodes = 1

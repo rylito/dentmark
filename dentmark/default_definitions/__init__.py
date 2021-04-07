@@ -13,7 +13,6 @@ from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
 
 
-
 @def_tag_set.register()
 class Root(TagDef):
     tag_name = 'root'
@@ -42,7 +41,6 @@ class Pre(TagDef):
 @def_tag_set.register()
 class Paragraph(TagDef):
     tag_name = 'p'
-    #exclude_children = ['p', 'li', 'bq']
 
     parents = [Optional('root'), Optional('root.bq')]
 
@@ -56,7 +54,6 @@ class Paragraph(TagDef):
 @def_tag_set.register()
 class BlockQuote(TagDef):
     tag_name = 'bq'
-    #allow_children = ['p', 'b', 's', 'i'] # TODO probably some others too
 
     parents = [Optional('root'), Optional('root.p.a8n.fn')]
 
@@ -66,7 +63,6 @@ class BlockQuote(TagDef):
 @def_tag_set.register()
 class HorizontalRule(TagDef):
     tag_name = 'hr'
-    #allow_children = []
 
     parents = [Optional('root')]
 
@@ -77,29 +73,9 @@ class HorizontalRule(TagDef):
 @def_tag_set.register()
 class Break(TagDef):
     tag_name = 'br'
-    #allow_children = []
 
     parents = [Optional('root'), Optional('root.p'), Optional('root.bq.p'), Optional('root.bq')]
 
     #TODO maybe enforce that this can't have any text/children?
     def render_main(self):
         return '<br/>'
-
-'''
-REGISTERED_TAGS = (
-    Root,
-    H1, H2, H3, H4, H5, H6,
-    Anchor, URLContext, TitleContext,
-    Pre,
-    Paragraph,
-    Annotation, FootNote,
-    Italic, Bold, StrikeThrough,
-    OrderedList, UnorderedList, ListItem,
-    Table, TableRow, TableCell, ColspanContext, RowspanContext, AlignContext,
-    BlockQuote,
-    HorizontalRule,
-    Break,
-    Image, AltContext,
-    YouTubeEmbed, WidthContext, HeightContext,
-)
-'''

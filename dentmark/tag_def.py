@@ -1,5 +1,3 @@
-#from abc import ABC, abstractmethod
-
 class Relation:
     # optional: (0 - many)
     #   min_count=0
@@ -53,29 +51,17 @@ class RequiredUnique(Relation):
 class TagDef:
     tag_name = None
     add_to_collector = False
-    #is_toc_section = False
     is_context = False
     is_pre = False
-    #is_root = False
-
-    #allow_children = None
-    #exclude_children = None
-
-    #required_children = []
-    #unique_children = []
 
     parents = []
 
     min_num_text_nodes = 0
     max_num_text_nodes = None
 
-
-    # maybe use type or issubclasss instead?
     is_element = True
 
     def __init__(self, tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right, extra_context):
-        #print(tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right)
-        #input('HOLD')
         # tag_name defined on class, but passed in ctor in case inheriting classes want to do something custom with this
         # (i.e. dynamically create defs)
         self.address = address
@@ -108,9 +94,6 @@ class TagDef:
     def is_root(cls):
         return not cls.parents
 
-    #@classmethod
-    #def addresses(cls):
-        #for
 
     @classmethod
     def init_as_root(cls, extra_context):
@@ -121,38 +104,9 @@ class TagDef:
         return root_elem
 
 
-    #@classmethod
-    #def get_relation_for_parent(cls, parent_address):
-        #for relation in cls.parents:
-            #if relation.parent_tag_address == parent_address:
-                #return relaton
-        #return None
-
-
-    #TODO needs rework - FIXME
-    #@classmethod
-    #def is_child_allowed(cls, child_tag_name):
-        #if cls.is_pre:
-            #return False
-        #elif cls.allow_children is not None:
-            #return child_tag_name in cls.allow_children
-        #else:
-            #return child_tag_name not in cls.exclude_children
-
-
     @classmethod
     def check(cls, tag_name): # the tag_name can be set dynamically by overriding classes. If so, it will be passed here so the address can be set correctly
         def_ref = f"TagDef '{cls.__name__}'"
-
-        #def check_defined_tags(attr_name, tag_names):
-            #if tag_names:
-                #unknown_set = set(tag_names).difference(tag_dict)
-                #if unknown_set:
-                    #raise Exception(f"{def_ref} contains undefined tag names in {attr_name}: {unknown_set}")
-
-        #for attr_name, val in (allow_def, exclude_def, required_def, unique_def):
-            #if val is not None and type(val) not in (list, tuple):
-                #raise Exception(f'{def_ref} specifies invalid value for {attr_name}. Must be None or tuple/list of tag names')
 
         if type(cls.parents) not in (list,tuple):
             raise Exception(f"{def_ref} specifies invalid value '{cls.parents}' for parents. Must be tuple/list of Relation instances")
@@ -171,32 +125,6 @@ class TagDef:
             declared_parent_tag_addresses.add(relation.parent_tag_address)
             cls.addresses.append(f'{relation.parent_tag_address}.{tag_name}')
 
-        #print(cls.addresses)
-
-        # check allow_children / exclude_children
-
-
-        #if cls.is_pre:
-            ##if allow_val or (exclude_val is False) or (exclude_val and exclude_val_type is not bool):
-            #if allow_def[1] or exclude_def[1] is not None:
-                #raise Exception(f'{def_ref} has is_pre=True. Pre tags cannot have children and exclude all tags by default. Remove the allow/exclude_children values from this def to use the default or explicitly set allow_children=[]')
-        #elif allow_def[1] is None and exclude_def[1] is None:
-            #raise Exception(f'{def_ref} must specify a value for either allow_children OR exclude_children')
-        #elif (allow_def[1] is not None and exclude_def[1] is not None):
-            #raise Exception(f'{def_ref} must specify a value for either allow_children OR exclude_children, not both')
-        #else:
-            #check_defined_tags(*(allow_def if allow_def[1] else exclude_def))
-
-        # check required_children / unique_children agree with allow_children / exclude_children
-        #for attr_name, val in (required_def, unique_def):
-            #if val:
-                # check that tag definiton exists
-                #check_defined_tags(attr_name, val)
-
-                # check that it's allowed as a child
-                #for tag_name in val:
-                    #if not cls.is_child_allowed(tag_name):
-                        #raise Exception(f'{def_ref} specifies a child tag in {attr_name} that is not allowed as a child: {tag_name}')
 
         # check min_num_text_nodes / max_num_text_nodes
         min_text_nodes = cls.min_num_text_nodes
@@ -210,11 +138,6 @@ class TagDef:
 
         if max_text_nodes is not None and max_text_nodes < min_text_nodes:
             raise Exception(f'{def_ref} max_num_text_nodes of {max_text_nodes} is less than min_num_text_nodes of {min_text_nodes}')
-
-        #num_required = len(required_def[1]) if required_def[1] else 0
-
-        #if min_text_nodes < num_required:
-            #raise Exception(f'{def_ref} min_num_children of {min_text_nodes} should be >= {num_required} since there are {num_required} {required_def[0]}')
 
 
     #TODO useful for debugging, but not actually used in the rendering process
@@ -260,18 +183,10 @@ class TagDef:
 
         for child in self.children:
             if child.is_element:
-                #if child.tag_name in self.unique_children:
-                    #if child.tag_name in seen:
-                        #raise Exception(f"Tag '{self.tag_name}' does not allow multiple children of type '{child.tag_name}': line {child.line_no}")
-                #seen.add(child.tag_name)
-
                 try:
                     child_defs[child.tag_name] += 1
                 except KeyError:
                     child_defs[child.tag_name] = 1
-
-                #if child.is_context:
-                    #continue # do not add this to the count
             else:
                 text_node_count += 1
 
@@ -292,15 +207,6 @@ class TagDef:
             if relation.min_count > 0:
                 if child_tag_name not in child_defs:
                     raise Exception(f"Tag '{self.tag_name}' has 0 children nodes of '{child_tag_name}' but expects at least {relation.min_count}: line {self.line_no}")
-
-
-    #---------------
-
-        #if self.required_children:
-            #missing = set(self.required_children).difference(seen)
-            #if missing:
-                #raise Exception(f"Tag '{self.tag_name}' missing required child tags {missing}: line {self.line_no}")
-
         if text_node_count < self.min_num_text_nodes:
             raise Exception(f"Tag '{self.tag_name}' has {text_node_count} non-element children node(s) but expects at least {self.min_num_text_nodes}: line {self.line_no}")
 
@@ -321,16 +227,7 @@ class TagDef:
         pass
 
 
-    #def final_check():
-        #validate = self.validate()
-        #if validate:
-            #raise Exception(f'{validate}: line {self.line_no}')
-
-
-    #def pre_render(self, extra_context={}):
     def pre_render(self):
-        #self.extra_context = extra_context
-
         for child in self.children:
             child.pre_render()
 
@@ -355,12 +252,9 @@ class TagDef:
 
 
     def render(self, main=True):
-        #if self.is_root():
         before_render = self.before_render()
         if before_render:
             raise Exception(f'before_render failed for tag {self.tag_name}: {before_render}')
-
-
 
         rendered_children = []
         prev_child = None
@@ -382,18 +276,15 @@ class TagDef:
 
 
     def render_main(self):
-        # TODO is this a sane default?
         return '' if self.is_context else self.content
 
 
     def render_secondary(self):
-        # TODO is this a sane default?
         return self.render_main()
 
 
     def add_child_element(self, tag_address, value, tag_set_name=None):
 
-        #tag_def = defs_manager.get_def(tag_name)
         from dentmark.dentmark import defs_manager
 
         tag_set = defs_manager.get_tag_set(tag_set_name)
@@ -401,13 +292,6 @@ class TagDef:
 
         if tag_def is None:
             raise Exception(f"Not a defined tag address: {tag_address}")
-
-        #children_relations = tag_set.get_children_relations(self.address)
-
-        #if tag_name not in self.allow_children:
-            #def_ref = f"TagDef '{self.__class__.__name__}'"
-
-            #raise Exception(f"Child tag '{tag_name}' not allowed as child of {def_ref}")
 
         # TODO just use None for values that can't be calculated. A bit hackish, but will
         # be fine to just re-generate the dentmark code. Not going to render this tree
@@ -450,6 +334,7 @@ class TagDef:
             for found in child.gen_tags_by_name(tag_name):
                 yield found
 
+
     def get_child_by_name(self, tag_name, return_multiple=False):
         multiple = []
         for child in self.children:
@@ -461,6 +346,7 @@ class TagDef:
                 return child
             multiple.append(child)
         return multiple if return_multiple else None
+
 
     # can be used to modify HTML classes without having to override which is a common operation
     def add_class(self, html_class_name):
@@ -485,8 +371,10 @@ class TagDef:
     def next_sibling(self):
         return self._sibling_helper(True)
 
+
     def prev_sibling(self):
         return self._sibling_helper(False)
+
 
     # if tag_name arg is 'p' and self is 'h3'
     # h3 (self), img, p(1), p(2) -> p(1)
@@ -496,16 +384,13 @@ class TagDef:
         for child in self.parent.children:
             if child is self:
                 start_search = True
-                #input('start_search')
                 continue
 
             if child.is_element and start_search:
                 if child.tag_name == tag_name:
                     return child
                 elif child.tag_name == self.tag_name:
-                    #input('dupe hit')
                     return None
-        #input('nada')
         return None
 
 

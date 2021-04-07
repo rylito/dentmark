@@ -4,14 +4,9 @@ from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
 
 
-
 @def_tag_set.register()
 class Image(TagDef):
     tag_name = 'img'
-
-    #allow_children = ['title', 'alt']
-
-    #unique_children = ['title', 'alt']
 
     min_num_text_nodes = 1
     max_num_text_nodes = 1
@@ -35,7 +30,6 @@ class Image(TagDef):
 class ImgAltContext(TagDef):
     tag_name = 'alt'
     is_context = True
-    #allow_children = []
 
     min_num_text_nodes = 1
     max_num_text_nodes = 1

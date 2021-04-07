@@ -4,7 +4,6 @@ from dentmark.dentmark import defs_manager
 def_tag_set = defs_manager.get_tag_set()
 
 
-
 class List(TagDef):
 
     min_num_text_nodes = 0
@@ -12,6 +11,7 @@ class List(TagDef):
 
     def render_main(self):
         return f'<{self.tag_name}>{self.content}</{self.tag_name}>'
+
 
 @def_tag_set.register()
 class ListItem(TagDef):
@@ -52,6 +52,7 @@ class UnorderedList(List):
     tag_name = 'ul'
 
     parents = [Optional('root'), Optional('root.ol.li')]
+
 
 @def_tag_set.register()
 class OrderedList(List):

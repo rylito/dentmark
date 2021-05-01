@@ -18,7 +18,7 @@ class ListItem(TagDef):
     tag_name = 'li'
 
     # allow nesting li 4 levels deep
-    parents = [Optional('root.ul'), Optional('root.ol'), Optional('root.ul.li'), Optional('root.ul.li.li'), Optional('root.ul.li.li.li'),Optional('root.ol.li'), Optional('root.ol.li.li'), Optional('root.ol.li.li.li'), Optional('root.ol.li.ul'), Optional('root.ul.li.ol')]
+    parents = [Optional('root.ul'), Optional('root.ol'), Optional('root.ul.li'), Optional('root.ul.li.li'), Optional('root.ul.li.li.li'),Optional('root.ol.li'), Optional('root.ol.li.li'), Optional('root.ol.li.li.li'), Optional('root.ol.li.ul'), Optional('root.ul.li.ol'), Optional('root.bq.ul'), Optional('root.bq.ol')]
 
     def render_main(self):
         return f'<li>{self.content}</li>'
@@ -51,11 +51,11 @@ class ListItem(TagDef):
 class UnorderedList(List):
     tag_name = 'ul'
 
-    parents = [Optional('root'), Optional('root.ol.li')]
+    parents = [Optional('root'), Optional('root.ol.li'), Optional('root.bq')]
 
 
 @def_tag_set.register()
 class OrderedList(List):
     tag_name = 'ol'
 
-    parents = [Optional('root'), Optional('root.ul.li')]
+    parents = [Optional('root'), Optional('root.ul.li'), Optional('root.bq')]

@@ -55,7 +55,7 @@ class Paragraph(TagDef):
 class BlockQuote(TagDef):
     tag_name = 'bq'
 
-    parents = [Optional('root'), Optional('root.p.a8n.fn')]
+    parents = [Optional('root'), Optional('root.p.a8n.fn'), Optional('root.bq.p.a8n.fn')]
 
     def render_main(self):
         return f'<blockquote>{self.content}</blockquote>'

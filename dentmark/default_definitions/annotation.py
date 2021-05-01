@@ -8,7 +8,7 @@ def_tag_set = defs_manager.get_tag_set()
 class Annotation(TagDef):
     tag_name = 'a8n'
 
-    parents = [Optional('root.p'), Optional('root.bq')] #TODO maybe this can be root level as well? Maybe blockquote too?
+    parents = [Optional('root.p'), Optional('root.bq'), Optional('root.bq.p'), Optional('root.ul.li')] #TODO maybe this can be root level as well? Maybe blockquote too?
 
     def render_main(self):
         nth_of_type = self.nth_of_type + 1
@@ -23,7 +23,7 @@ class FootNote(TagDef):
     tag_name = 'fn'
     add_to_collector = True
 
-    parents = [Optional('root.p.a8n'), Optional('root.bq.a8n')]
+    parents = [Optional('root.p.a8n'), Optional('root.bq.a8n'), Optional('root.bq.p.a8n'), Optional('root.ul.li.a8n')]
 
     def render_main(self):
         return '' # don't render anything in-place

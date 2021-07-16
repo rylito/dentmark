@@ -423,3 +423,44 @@ class TagDef:
             return f'{tab}{trim_left}{self.tag_name}{trim_right}:{children_str}'
 
 
+# TagDef helpers
+
+# TODO make abc?
+class BoolTagDef(TagDef):
+    # tag_name should be set by inheriting class
+    is_context = True
+
+    min_num_text_nodes = 0
+    max_num_text_nodes = 1
+
+    def process_data(self, data):
+        if data:
+            return data[0].lower() == 'true'
+        return True
+
+    def validate(self):
+        if self.children:
+            if self.children[0].get_data().lower() not in ('true', 'false'):
+                return f"'{self.tag_name}' tag value must be either 'true', 'false', or [empty]. Defaults to 'true' if [empty]"
+
+
+# TODO make abc?
+class PosIntTagDef(TagDef):
+    # tag_name should be set by inheriting class
+    is_context = True
+
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
+
+    def process_data(self, data):
+        val = int(data[0])
+        if val < 1:
+            raise ValueError
+        return val
+
+
+    def validate(self):
+        try:
+            self.get_data()
+        except ValueError:
+            return f"Tag '{self.tag_name}' expects a positive integer >= 1"

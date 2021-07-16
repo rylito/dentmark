@@ -37,8 +37,12 @@ class URLContext(TagDef):
 
 
 @def_tag_set.register()
-class AnchorTitleContext(URLContext):
+class AnchorTitleContext(TagDef):
     tag_name = 'title'
+    is_context = True
+
+    min_num_text_nodes = 1
+    max_num_text_nodes = 1
 
     parents = [OptionalUnique('root.a'), OptionalUnique('root.p.a')]
 

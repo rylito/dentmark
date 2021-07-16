@@ -1,0 +1,4 @@
+- li needs to allow a
+- td needs to allow a
+
+TODO: enforce that context can't have -*- trimming chars?

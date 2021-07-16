@@ -74,8 +74,10 @@ class HorizontalRule(TagDef):
 class Break(TagDef):
     tag_name = 'br'
 
+    min_num_text_nodes = 0
+    max_num_text_nodes = 0
+
     parents = [Optional('root'), Optional('root.p'), Optional('root.bq.p'), Optional('root.bq')]
 
-    #TODO maybe enforce that this can't have any text/children?
     def render_main(self):
         return '<br/>'

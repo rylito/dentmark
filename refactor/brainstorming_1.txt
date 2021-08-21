@@ -1,0 +1,34 @@
+scalar_types:
+    str
+    numeric
+    bool
+
+composite types:
+    obj
+    list
+
+node:
+    children:
+        a
+
+p.*:
+    required: [bool]
+    repeatable: [bool]
+    exclusive:
+
+p.text_node:
+    inherits: text_node
+
+p.a:
+    inherits: a
+
+p:
+    scalar:
+    list:
+        type:
+        min:
+        max:
+
+p.:
+    min:
+    max:

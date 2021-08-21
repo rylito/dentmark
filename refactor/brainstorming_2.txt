@@ -1,0 +1,54 @@
+
+
+
+
+text_node:
+    children_type: []
+    abstract:
+    min: 0
+    max: [null]
+    type: [str, numeric, bool]
+
+
+i:
+    children_type:
+        text_node:
+            #min:
+            #max:
+
+    render: render_i
+
+
+a:
+    children_type:
+        text_node:
+        i:
+    render: render_a
+
+p:
+    children_type:
+        text_node:
+        i:
+        a:
+        img:
+    render: render_p
+
+height:
+    children_type:
+        text_node:
+            min: 1
+            max: 1
+            type: numeric
+    scalar:
+    abstract:
+    min: 0
+    max: 1
+
+img:
+    children_type:
+        text_node:
+            min: 1
+            max: 1
+        height:
+    abstract:
+    render: render_img

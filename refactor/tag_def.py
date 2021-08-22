@@ -61,9 +61,11 @@ class TagDef:
 
     is_element = True
 
-    def __init__(self, tag_name, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right, extra_context):
+    def __init__(self, syntax_node, address, line_no, indent_level, parent, root, order, nth_of_type, trim_left, trim_right, extra_context):
         # tag_name defined on class, but passed in ctor in case inheriting classes want to do something custom with this
         # (i.e. dynamically create defs)
+        self.tag_name = syntax_node.name
+        self.syntax_node = syntax_node
         self.address = address
 
         self.trim_left = trim_left
@@ -96,10 +98,11 @@ class TagDef:
 
 
     @classmethod
-    def init_as_root(cls, extra_context):
+    def init_as_root(cls, syntax_node, extra_context=None):
         if not cls.is_root():
             raise Exception(f"Cannot init non-root TagDef '{cls.__name__}' as root")
-        root_elem = cls(cls.tag_name, cls.tag_name, None, None, None, None, 0, 0, False, False, extra_context)
+        address = syntax_node.name
+        root_elem = cls(syntax_node, address, None, None, None, None, 0, 0, False, False, extra_context)
         root_elem.root = root_elem
         return root_elem
 
@@ -174,45 +177,53 @@ class TagDef:
 
 
     # enforces required, unique children and min/max_num_text_nodes
-    def check_children(self, child_relations):
+    def check_children(self):
 
         # {child_tag_name: count}
         child_defs = {}
 
-        text_node_count = 0
+        #text_node_count = 0
 
         for child in self.children:
-            if child.is_element:
-                try:
-                    child_defs[child.tag_name] += 1
-                except KeyError:
-                    child_defs[child.tag_name] = 1
-            else:
-                text_node_count += 1
+            print(self.tag_name, child.tag_name if hasattr(child, 'tag_name') else '[text]')
+            try:
+                child_defs[child.syntax_node] += 1
+            except KeyError:
+                child_defs[child.syntax_node] = 1
+            #else:
+                #text_node_count += 1
+
+        print(self.tag_name, child_defs)
+        print([str(x) for x in child_defs.keys()])
 
 
         # check present children
-        for tag_name, count in child_defs.items():
-            relation = child_relations[tag_name]
+        for syntax_node, count in child_defs.items():
+            #relation = child_relations[tag_name]
 
-            if count < relation.min_count:
-                raise Exception(f"Tag '{self.tag_name}' has {count} children node(s) of '{tag_name}' but expects at least {relation.min_count}: line {self.line_no}")
+            if count < syntax_node.min:
+                raise Exception(f"Tag '{self.tag_name}' has {count} children node(s) of '{syntax_node}' but expects at least {syntax_node.min}: line {self.line_no}")
 
-            if relation.max_count is not None:
-                if count > relation.max_count:
-                    raise Exception(f"Tag '{self.tag_name}' has {count} children node(s) of '{tag_name}' but expects no more than {relation.max_count}: line {self.line_no}")
+            if syntax_node.max is not None:
+                if count > syntax_node.max:
+                    raise Exception(f"Tag '{self.tag_name}' has {count} children node(s) of '{syntax_node}' but expects no more than {syntax_node.max}: line {self.line_no}")
 
         # check for non-present children that are required (i.e. min_count > 0)
-        for child_tag_name, relation in child_relations.items():
-            if relation.min_count > 0:
-                if child_tag_name not in child_defs:
-                    raise Exception(f"Tag '{self.tag_name}' has 0 children nodes of '{child_tag_name}' but expects at least {relation.min_count}: line {self.line_no}")
-        if text_node_count < self.min_num_text_nodes:
-            raise Exception(f"Tag '{self.tag_name}' has {text_node_count} non-element children node(s) but expects at least {self.min_num_text_nodes}: line {self.line_no}")
+        #for syntax_node in self.syntax_node.get_required_children():
+            #if syntax_node not in child_defs:
+                #if syntax_node
+        missing = self.syntax_node.get_required_children().difference(child_defs)
+        #for child_tag_name, relation in child_relations.items():
+            #if relation.min_count > 0:
+        if missing:
+                #if child_tag_name not in child_defs:
+            raise Exception(f"Tag '{self.tag_name}' is missing required nodes: {', '.join(str(x) for x in missing)}: line {self.line_no}")
+        #if text_node_count < self.min_num_text_nodes:
+            #raise Exception(f"Tag '{self.tag_name}' has {text_node_count} non-element children node(s) but expects at least {self.min_num_text_nodes}: line {self.line_no}")
 
-        if self.max_num_text_nodes is not None:
-            if text_node_count > self.max_num_text_nodes:
-                raise Exception(f"Tag '{self.tag_name}' has {text_node_count} non-element children node(s) but expects no more than {self.max_num_text_nodes}: line {self.line_no}")
+        #if self.max_num_text_nodes is not None:
+            #if text_node_count > self.max_num_text_nodes:
+                #raise Exception(f"Tag '{self.tag_name}' has {text_node_count} non-element children node(s) but expects no more than {self.max_num_text_nodes}: line {self.line_no}")
 
         validate = self.validate()
         if validate:

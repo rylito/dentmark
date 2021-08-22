@@ -67,8 +67,8 @@ class Parser:
 
     def _rollup(self):
         popped = self.stack.pop()
-        children_relations = self.defs_set.get_children_relations(popped.address)
-        popped.check_children(children_relations)
+        self.syntax_stack.pop()
+        popped.check_children()
         tail = self.stack[-1]
         tail.children.append(popped)
         return popped
@@ -104,15 +104,19 @@ class Parser:
         if self.is_element:
             #TODO figure this out with new syntax strategy
             tag_address = f'{parent_node.address}.{self.name_accum}'
-            tag_def = self.defs_set.get_def(tag_address)
-            if tag_def is None:
+            #tag_def = self.defs_set.get_def(tag_address)
+
+            syntax_node = self.syntax_stack[-1].allowed_children.get_node(self.name_accum)
+
+            if syntax_node is None:
                 raise Exception(f'Invalid tag on line {prev_line_no}. Definition for tag does not exist: {tag_address}')
 
             #TODO do we want to base the counts on the name_accum or the address? for now, just go off name_accum
             prev_count = self.counts.get(self.name_accum, 0)
             self.counts[self.name_accum] = prev_count + 1
 
-            node = tag_def(self.name_accum, tag_address, prev_line_no, prev_indent_level, parent_node, root, child_order, prev_count, self.trim_left, self.trim_right, self.extra_context)
+
+            node = TagDef(syntax_node, tag_address, prev_line_no, prev_indent_level, parent_node, root, child_order, prev_count, self.trim_left, self.trim_right, self.extra_context)
 
             text = None
             if self.pre_text_pending:
@@ -123,10 +127,16 @@ class Parser:
                 if first_element != '':
                     text = first_element
             if text is not None:
-                node.children.append(TextNode(prev_line_no, prev_indent_level, node, root, 0, text, False, self.extra_context))
+                syntax_node_text = syntax_node.allowed_children.text_node
+
+                if syntax_node_text is None:
+                    raise Exception(f'Invalid text on line {prev_line_no}. Tag does not allow text nodes: {tag_address}') #TODO what to do about address?
+
+                node.children.append(TextNode(syntax_node_text, prev_line_no, prev_indent_level, node, root, 0, text, False, self.extra_context))
 
 
             self.stack.append(node)
+            self.syntax_stack.append(syntax_node)
 
         else:
             # use strip() here to remove any leading whitespace on escaped lines, i.e.
@@ -137,7 +147,12 @@ class Parser:
             #      ^ strip this
             text = self.line_accum.strip()
 
-            node = TextNode(prev_line_no, prev_indent_level, parent_node, root, child_order, text, self.escaped, self.extra_context)
+            syntax_node = self.syntax_stack[-1].allowed_children.text_node
+
+            if syntax_node is None:
+                raise Exception(f'Invalid text on line {prev_line_no}. Tag does not allow text nodes: {tag_address}') #TODO what to do about address?
+
+            node = TextNode(syntax_node, prev_line_no, prev_indent_level, parent_node, root, child_order, text, self.escaped, self.extra_context)
             parent_node.children.append(node)
 
         self.prev_processed = node
@@ -188,8 +203,10 @@ class Parser:
                 address = f'{parent.address}.{self.name_accum}'
 
                 #if self.defs_set.is_pre(address):
-                #TODO fix this to use address
-                if self.root_syntax_node.is_descendant_pre(self.name_accum):
+                #TODO clean this up
+                #if self.root_syntax_node.is_descendant_pre(self.name_accum):
+                syntax_node = self.syntax_stack[-1].allowed_children.get_node(self.name_accum)
+                if syntax_node is not None and syntax_node.is_pre:
                     self.pre_mode = True
         elif c == TRIM:
             if not is_start_of_line:
@@ -246,16 +263,18 @@ class Parser:
         # make sure def set is checked
         self.only_address = only_address
 
-        self.defs_set.check()
+        #self.defs_set.check()
 
         self.counts = {}
 
         class RootTag(TagDef):
-            is_root = True
+            pass
 
         #self.stack = [self.defs_set.root_def.init_as_root(self.extra_context)]
-        root_parse_node = RootTag.init_as_root()
+        root_parse_node = RootTag.init_as_root(self.root_syntax_node)
         self.stack = [root_parse_node]
+
+        self.syntax_stack = [self.root_syntax_node]
 
         self.prev_processed = None
         self.lowest_indent = None
@@ -324,8 +343,7 @@ class Parser:
                 self.pre_text_pending = True
             self._append_stack(prev_indent_level, self.lowest_indent, prev_line_no, None)
 
-        children_relations = self.defs_set.get_children_relations(self.stack[0].address)
-        self.stack[0].check_children(children_relations) # check the root node to make sure its children are valid
+        self.stack[0].check_children()
 
         return self.stack[0]
 
@@ -337,24 +355,32 @@ if __name__ == '__main__':
 
     text_node = SyntaxNode()
     #text_node.is_abstract = True
-    text_node.scalar_type_cls = String
+    #text_node.scalar_type_cls = String
+    #text_node.min = 1
 
     i_node = SyntaxNode()
     i_node.allowed_children = SyntaxNodeMap([text_node])
-    i_node.name = 'I' #TODO use a setter for this?
+    #i_node.allowed_children = SyntaxNodeMap()
+    i_node.name = 'i' #TODO use a setter for this?
 
     #node_map = SyntaxNodeMap([i_node])
 
+    p_node = SyntaxNode()
+    p_node.allowed_children = SyntaxNodeMap([i_node])
+    p_node.name = 'p'
+
     root_node = SyntaxNode()
-    root_node.allowed_children = SyntaxNodeMap([i_node])
+    root_node.allowed_children = SyntaxNodeMap([p_node, i_node])
     root_node.is_root = True
 
     #print(root_node.search_for_node('i'))
     #print(root_node.is_descendant_pre('i'))
 
     with open('test.dentmark', 'r') as f:
-        parser = Parser(root_node, f)
+        parser = Parser(root_node, f, {})
 
         root_node = parser.parse()
+
+    print(root_node.walk())
 
 

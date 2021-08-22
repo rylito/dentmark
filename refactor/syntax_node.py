@@ -74,6 +74,15 @@ class SyntaxNodeMap:
 
         print('after add', self.node_map, self.text_node, self.dynamic_name_node)
 
+    def get_required_children(self):
+        required_set = set([child for child in self.node_map.values() if child.min > 0])
+        #TODO scalars must have 1 required text node - enforce this
+        for node in (self.text_node, self.dynamic_name_node):
+            if node is not None and node.min > 0:
+                required_set.add(node)
+        return required_set
+
+    '''
     def search_for_node(self, name):
         print('hit', self.node_map)
         for syntax_node in self.node_map.values():
@@ -83,11 +92,12 @@ class SyntaxNodeMap:
                 return found_node
 
         return None
+    '''
 
 
 class SyntaxNode:
     def __init__(self):
-        self.children = []
+        #self.children = []
         self.allowed_children = SyntaxNodeMap()
         self.min = 0
         self.max = None
@@ -101,25 +111,42 @@ class SyntaxNode:
         self.is_root = False
         self.is_pre = False
 
+        #TODO enforce that allowed children can't mix pre-defined and varname nodes (or maybe allow this with pre-defined taking priority?
+
     @property
     def is_text_node(self):
         return self.name is None and not self.dynamic_name and not self.is_root
 
         #TODO error to have self.name and self.dynamic_name both True
 
+    def get_required_children(self):
+        return self.allowed_children.get_required_children()
+
+    def __str__(self):
+        if self.is_text_node:
+            return '[text node]'
+        elif self.dynamic_name:
+            return '[dynamic name]'
+        else:
+            return self.name
+
+    '''
     def search_for_node(self, name): # searches for a descendant node
         if name.upper() == self.name:
             return self
         else:
             print('in node', self.name, 'looking for', name)
             return self.allowed_children.search_for_node(name)
+    '''
 
+    '''
     def is_descendant_pre(self, name):
         node = self.search_for_node(name)
         if node is not None:
             print('Checking node', name, 'for pre')
             return node.is_pre
         return False
+    '''
 
 
 
